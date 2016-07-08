@@ -9,7 +9,7 @@
  * RC reviever 8 ch PIN: 31, 33, 35, 37, 39, 41, 43, 45
  * 
  * Sensorsticka I2C:
- * I2C device found at address 0x1E  ! = 0b 0001 1110
+ * I2C device found at address 0x1E  ! = HMC5883L magnetometer
  * I2C device found at address 0x41  ! = BMA180 accelerometer
  * I2C device found at address 0x42  ! = 0b 0100 0010
  * I2C device found at address 0x68  ! = ITG3050 gyro
@@ -131,10 +131,10 @@ void loop() {
         long motor_RR_output = throttle - roll + pitch + yaw;
 
         if(throttle < 140){
-          motor_FR_output = 132;
-          motor_RL_output = 132;
-          motor_FL_output = 132;
-          motor_RR_output = 132;
+          motor_FR_output = ESC_MIN;
+          motor_RL_output = ESC_MIN;
+          motor_FL_output = ESC_MIN;
+          motor_RR_output = ESC_MIN;
           Serial.print("Throttle to low to run engines.       ");
         }
 

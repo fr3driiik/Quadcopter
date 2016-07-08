@@ -2,7 +2,7 @@
 
 #define accAddress 0x41 // BMA180
 #define gyroAddress 0x68 //ITG3050
-//magnetometer HMC5883L
+#defube magnetoAdress 0x1E //HMC5883L
 //barometric pressure MS5611
 //GPS NEO-6Q
 
