@@ -16,6 +16,7 @@
  * I2C device found at address 0x76  ! = 0b 0111 0110
  * 
  */
+
 #include <PinChangeInt.h>
 #include <PID_v1.h>
 
@@ -72,18 +73,16 @@ uint32_t yawStart;
 uint32_t rollStart;
 uint32_t throttleStart;
 
-int speed = 0;
-
 void setup() {
     Serial.begin(9600);
     pinMode(CHANNEL1_IN_PIN, INPUT);
     pinMode(CHANNEL2_IN_PIN, INPUT);
     pinMode(CHANNEL3_IN_PIN, INPUT);
     pinMode(CHANNEL4_IN_PIN, INPUT);
-    PCintPort::attachInterrupt(CHANNEL1_IN_PIN, calcChannel1, CHANGE);
-    PCintPort::attachInterrupt(CHANNEL2_IN_PIN, calcChannel2, CHANGE);
-    PCintPort::attachInterrupt(CHANNEL3_IN_PIN, calcChannel3, CHANGE);
-    PCintPort::attachInterrupt(CHANNEL4_IN_PIN, calcChannel4, CHANGE);
+    PCintPort::attachInterrupt(A15, calcChannel1, CHANGE);
+    PCintPort::attachInterrupt(A14, calcChannel2, CHANGE);
+    PCintPort::attachInterrupt(A13, calcChannel3, CHANGE);
+    PCintPort::attachInterrupt(A12, calcChannel4, CHANGE);
 }
 
 void loop() {
@@ -93,8 +92,9 @@ void loop() {
     static uint16_t rollIn;
     static uint16_t throttleIn;
 
-    if(timeOfLastTransmission > 0 && (micros() - timeOfLastTransmission) > FAILSAFE_DELAY){
+    if(timeOfLastTransmission == 0 || (micros() - timeOfLastTransmission) > FAILSAFE_DELAY){
         Serial.println("FAILSAFE");
+        //run engines at proper level
         return;
     }
     
@@ -129,6 +129,14 @@ void loop() {
         long motor_RL_output = throttle + roll + pitch - yaw;
         long motor_FL_output = throttle + roll - pitch + yaw;
         long motor_RR_output = throttle - roll + pitch + yaw;
+
+        if(throttle < 140){
+          motor_FR_output = 132;
+          motor_RL_output = 132;
+          motor_FL_output = 132;
+          motor_RR_output = 132;
+          Serial.print("Throttle to low to run engines.       ");
+        }
 
         
 

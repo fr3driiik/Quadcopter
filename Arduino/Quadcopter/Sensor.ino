@@ -1,4 +1,3 @@
-#include "Kalman.h"
 #include <Wire.h>
 
 #define accAddress 0x41 // BMA180
@@ -6,10 +5,6 @@
 //magnetometer HMC5883L
 //barometric pressure MS5611
 //GPS NEO-6Q
-
-Kalman kalmanX;
-Kalman kalmanY;
-Kalman kalmanZ;
 
 // GYRO x = 0x1D, y = 0x1F, z = 0x21
 
@@ -28,16 +23,12 @@ uint8_t i2cBuffer[2];
 
 long total = 0;
 int antal = 0;
-
+/*
 void setup() {
   Serial.begin(9600);
   Wire.begin();
 
   initGyro(); 
-
-  kalmanX.setAngle(180);
-  kalmanY.setAngle(180);
-  kalmanZ.setAngle(180);
   timer = micros();
 
 }
@@ -67,7 +58,7 @@ void loop() {
   Serial.println(" deg");
 
   timer = micros();
-}
+}*/
 
 void initGyro(){
   i2cWrite(gyroAddress, 0x16, 0x00); // (STANDARD) sets gyro to +/-250deg/sec and 256Hz LPF
