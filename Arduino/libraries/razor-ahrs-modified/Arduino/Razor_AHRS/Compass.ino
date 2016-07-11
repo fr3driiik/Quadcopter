@@ -9,10 +9,10 @@ void Compass_Heading()
   float cos_pitch;
   float sin_pitch;
   
-  cos_roll = cos(roll);
-  sin_roll = sin(roll);
-  cos_pitch = cos(pitch);
-  sin_pitch = sin(pitch);
+  cos_roll = cos(pitch); //I swithed this from roll to pitch
+  sin_roll = sin(pitch); //I swithed this from roll to pitch
+  cos_pitch = cos(roll); //and this from pitch to roll
+  sin_pitch = sin(roll); //and this from pitch to roll
   
   // Tilt compensated magnetic field X
   mag_x = magnetom[0] * cos_pitch + magnetom[1] * sin_roll * sin_pitch + magnetom[2] * cos_roll * sin_pitch;
