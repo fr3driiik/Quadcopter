@@ -73,6 +73,128 @@ uint32_t yawStart;
 uint32_t rollStart;
 uint32_t throttleStart;
 
+//RCinput
+float RCroll = 0;
+float RCpitch = 0;
+float RCthrottle = 0;
+float RCyaw = 0;
+
+//------AA-------HH----HH---RRRR---------SSSS---
+//-----AAAA------HH----HH---RR--RR-----SS------
+//----AA--AA-----HHHHHHHH---RRRR---------SS----
+//---AAAAAAAA----HH----HH---RR--RR---------SS--
+//--AA------AA---HH----HH---RR----RR---SSSS----
+
+// OUTPUT OPTIONS
+/*****************************************************************/
+// Set your serial port baud rate used to send out data here!
+#define OUTPUT__BAUD_RATE 57600
+
+// Sensor data output interval in milliseconds
+// This may not work, if faster than 20ms (=50Hz)
+// Code is tuned for 20ms, so better leave it like that
+#define OUTPUT__DATA_INTERVAL 20  // in milliseconds
+
+// Output mode definitions (do not change)
+#define OUTPUT__MODE_CALIBRATE_SENSORS 0 // Outputs sensor min/max values as text for manual calibration
+#define OUTPUT__MODE_ANGLES 1 // Outputs yaw/pitch/roll in degrees
+#define OUTPUT__MODE_SENSORS_CALIB 2 // Outputs calibrated sensor values for all 9 axes
+#define OUTPUT__MODE_SENSORS_RAW 3 // Outputs raw (uncalibrated) sensor values for all 9 axes
+#define OUTPUT__MODE_SENSORS_BOTH 4 // Outputs calibrated AND raw sensor values for all 9 axes
+// Output format definitions (do not change)
+#define OUTPUT__FORMAT_TEXT 0 // Outputs data as text
+#define OUTPUT__FORMAT_BINARY 1 // Outputs data as binary float
+
+// Select your startup output mode and format here!
+int output_mode = OUTPUT__MODE_ANGLES;
+int output_format = OUTPUT__FORMAT_TEXT;
+
+// Select if serial continuous streaming output is enabled per default on startup.
+#define OUTPUT__STARTUP_STREAM_ON true  // true or false
+
+// If set true, an error message will be output if we fail to read sensor data.
+// Message format: "!ERR: reading <sensor>", followed by "\r\n".
+boolean output_errors = false;  // true or false
+
+// Gain for gyroscope (ITG-3200)
+#define GYRO_GAIN 0.06957 // Same gain on all axes
+#define GYRO_SCALED_RAD(x) (x * TO_RAD(GYRO_GAIN)) // Calculate the scaled gyro readings in radians per second
+
+// DCM parameters
+#define Kp_ROLLPITCH 0.02f
+#define Ki_ROLLPITCH 0.00002f
+#define Kp_YAW 1.2f
+#define Ki_YAW 0.00002f
+
+// Stuff
+#define STATUS_LED_PIN 13  // Pin number of status LED
+#define GRAVITY 256.0f // "1G reference" used for DCM filter and accelerometer calibration
+#define TO_RAD(x) (x * 0.01745329252)  // *pi/180
+#define TO_DEG(x) (x * 57.2957795131)  // *180/pi
+
+// Sensor variables
+float accel[3];  // Actually stores the NEGATED acceleration (equals gravity, if board not moving).
+float accel_min[3];
+float accel_max[3];
+
+float magnetom[3];
+float magnetom_min[3];
+float magnetom_max[3];
+float magnetom_tmp[3];
+
+float gyro[3];
+float gyro_average[3];
+int gyro_num_samples = 0;
+
+// DCM variables
+float MAG_Heading;
+float Accel_Vector[3]= {0, 0, 0}; // Store the acceleration in a vector
+float Gyro_Vector[3]= {0, 0, 0}; // Store the gyros turn rate in a vector
+float Omega_Vector[3]= {0, 0, 0}; // Corrected Gyro_Vector data
+float Omega_P[3]= {0, 0, 0}; // Omega Proportional correction
+float Omega_I[3]= {0, 0, 0}; // Omega Integrator
+float Omega[3]= {0, 0, 0};
+float errorRollPitch[3] = {0, 0, 0};
+float errorYaw[3] = {0, 0, 0};
+float DCM_Matrix[3][3] = {{1, 0, 0}, {0, 1, 0}, {0, 0, 1}};
+float Update_Matrix[3][3] = {{0, 1, 2}, {3, 4, 5}, {6, 7, 8}};
+float Temporary_Matrix[3][3] = {{0, 0, 0}, {0, 0, 0}, {0, 0, 0}};
+
+// DCM timing in the main loop
+unsigned long timestamp;
+unsigned long timestamp_old;
+float G_Dt; // Integration time for DCM algorithm
+
+// More output-state variables
+boolean output_stream_on;
+boolean output_single_on;
+int curr_calibration_sensor = 0;
+boolean reset_calibration_session_flag = true;
+int num_accel_errors = 0;
+int num_magn_errors = 0;
+int num_gyro_errors = 0;
+
+// Euler angles
+float yaw;
+float pitch;
+float roll;
+
+//---------------------------------------------
+//---------------------------------------------
+//---------------------------------------------
+
+//PIDs and their variables
+
+float pitch_output = 0;
+float roll_output = 0;
+float yaw_output = 0;
+
+
+PID pidPitchRate(&gyro[1], &pitch_output, &RCpitch, 0.1, 0, 0, REVERSE);
+PID pidRollRate(&gyro[0], &roll_output, &RCroll, 0.1, 0, 0, DIRECT);
+PID pidYawRate(&gyro[2], &yaw_output, &RCyaw, 0.1, 0, 0, REVERSE);
+
+
 void setup() {
     Serial.begin(9600);
     pinMode(CHANNEL1_IN_PIN, INPUT);
@@ -83,6 +205,9 @@ void setup() {
     PCintPort::attachInterrupt(A14, calcChannel2, CHANGE);
     PCintPort::attachInterrupt(A13, calcChannel3, CHANGE);
     PCintPort::attachInterrupt(A12, calcChannel4, CHANGE);
+    setupAHRS();
+    initPids();
+    setPidsOutputLimits(-40, 40);
 }
 
 void loop() {
@@ -92,13 +217,13 @@ void loop() {
     static uint16_t rollIn;
     static uint16_t throttleIn;
 
-    if(timeOfLastTransmission == 0 || (micros() - timeOfLastTransmission) > FAILSAFE_DELAY){
+    if(timeOfLastTransmission == 0 || (micros() - timeOfLastTransmission) > FAILSAFE_DELAY){ //transmitter not connected
         Serial.println("FAILSAFE");
         //run engines at proper level
         return;
-    }
+    } //transmitter not connected
     
-    if(channelFlagsShared){
+    if(channelFlagsShared){ //handle interupted pins
         noInterrupts();
 
         //copy changed shared variables
@@ -120,60 +245,89 @@ void loop() {
 
         interrupts();
 
-        long roll = map(rollIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
-        long pitch = map(pitchIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
-        long throttle = map(throttleIn, RCRECIEVER_MIN, RCRECIEVER_MAX, ESC_MIN, ESC_MAX);
-        long yaw = map(yawIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -135, 135);
-
-        long motor_FR_output = throttle - roll - pitch - yaw;
-        long motor_RL_output = throttle + roll + pitch - yaw;
-        long motor_FL_output = throttle + roll - pitch + yaw;
-        long motor_RR_output = throttle - roll + pitch + yaw;
-
-        if(throttle < 140){
-          motor_FR_output = ESC_MIN;
-          motor_RL_output = ESC_MIN;
-          motor_FL_output = ESC_MIN;
-          motor_RR_output = ESC_MIN;
-          Serial.print("Throttle to low to run engines.       ");
-        }
-
+        RCroll = map(rollIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
+        RCpitch = -map(pitchIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
+        RCthrottle = map(throttleIn, RCRECIEVER_MIN, RCRECIEVER_MAX, ESC_MIN, ESC_MAX);
+        RCyaw = map(yawIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -135, 135);   
         
+    } //handle interupted pins
 
-        // PRINT FOR TESTINT******************************************************
-        Serial.print("thr: ");
-        Serial.print(throttle);
-        Serial.print("     ");
-        Serial.print("pitch: ");
-        Serial.print(pitch);
-        Serial.print("     ");
-        Serial.print("yaw: ");
-        Serial.print(yaw);
-        Serial.print("     ");
-        Serial.print("roll: ");
-        Serial.print(roll);
-        Serial.print("     ");
-       
-        Serial.print("motorFR: ");
-        Serial.print(motor_FR_output);
-        Serial.print("     ");
-        Serial.print("motorRL: ");
-        Serial.print(motor_RL_output);
-        Serial.print("     ");
-        Serial.print("motorFL: ");
-        Serial.print(motor_FL_output);
-        Serial.print("     ");
-        Serial.print("motorRR: ");
-        Serial.println(motor_RR_output);
-        // PRINT FOR TESTINT******************************************************
-        
-        analogWrite(MOTOR_FR_OUT_PIN, motor_FR_output);
-        analogWrite(MOTOR_RL_OUT_PIN, motor_RL_output);
-        analogWrite(MOTOR_FL_OUT_PIN, motor_FL_output);
-        analogWrite(MOTOR_RR_OUT_PIN, motor_RR_output);
+    loopAHRS();  //ahrs algorithm
+
+    if(RCthrottle > 140){ //calc PIDS and run engines accordingly
+
+      //calc pids
+      computePids();
+
+      Serial.print("pid: ");
+      Serial.print(yaw_output);
+      Serial.print(" |||||  ");
+
+      //calc engine values
+      long motor_FR_output = RCthrottle - RCroll - RCpitch - RCyaw;
+      long motor_RL_output = RCthrottle + RCroll + RCpitch - RCyaw;
+      long motor_FL_output = RCthrottle + RCroll - RCpitch + RCyaw;
+      long motor_RR_output = RCthrottle - RCroll + RCpitch + RCyaw; 
+      
+      // PRINT FOR TESTING******************************************************
+      //Serial.print("RC in (#typr): "); Serial.print(RCthrottle); Serial.print(", "); Serial.print(RCyaw); Serial.print(", "); Serial.print(RCpitch); Serial.print(", "); Serial.print(RCroll); Serial.print("   "); 
+      //Serial.print("EngOut: fr: "); Serial.print(motor_FR_output); Serial.print(" fl:"); Serial.print(motor_FL_output); Serial.print(" rr:"); Serial.print(motor_RR_output); Serial.print(" rl:"); Serial.print(motor_RL_output); Serial.print("   ");
+      // PRINT FOR TESTING******************************************************
+
+      //send engine values
+      analogWrite(MOTOR_FR_OUT_PIN, motor_FR_output);
+      analogWrite(MOTOR_RL_OUT_PIN, motor_RL_output);
+      analogWrite(MOTOR_FL_OUT_PIN, motor_FL_output);
+      analogWrite(MOTOR_RR_OUT_PIN, motor_RR_output); 
+    } else { //too low throttle
+      //send engine values
+      analogWrite(MOTOR_FR_OUT_PIN, ESC_MIN);
+      analogWrite(MOTOR_RL_OUT_PIN, ESC_MIN);
+      analogWrite(MOTOR_FL_OUT_PIN, ESC_MIN);
+      analogWrite(MOTOR_RR_OUT_PIN, ESC_MIN);
+      Serial.print("Throttle too low to run engines.   ");
+
+      //reset pids
+      resetPids();
     }
+    
+
+    
+} // loop()
+
+void computePids(){
+  pidPitchRate.Compute();
+  pidRollRate.Compute();
+  pidYawRate.Compute();
 }
 
+void initPids(){
+  pidPitchRate.SetMode(AUTOMATIC);
+  pidRollRate.SetMode(AUTOMATIC);
+  pidYawRate.SetMode(AUTOMATIC);
+}
+
+void resetPids(){
+  pidPitchRate.Reset();
+  pidRollRate.Reset();
+  pidYawRate.Reset();
+}
+
+void setPidsOutputLimits(float low, float high){
+  pidPitchRate.SetOutputLimits(low, high);
+  pidRollRate.SetOutputLimits(low, high);
+  pidYawRate.SetOutputLimits(low, high);
+}
+
+void setPidsSampleTime(int time){ //millis
+  pidPitchRate.SetSampleTime(50);
+  pidRollRate.SetSampleTime(50);
+  pidYawRate.SetSampleTime(50);
+}
+
+//---------------------------------------------------
+//--------------INTERUPT HANDLERS--------------------
+//---------------------------------------------------
 void calcChannel1(){
     if(digitalRead(CHANNEL1_IN_PIN) == HIGH){ //start of signal
         rollStart = micros();
