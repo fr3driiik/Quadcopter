@@ -184,15 +184,23 @@ float roll;
 //---------------------------------------------
 
 //PIDs and their variables
+float pitch_stab_output = 0;
+float roll_stab_output = 0;
+float yaw_stab_output = 0;
 
 float pitch_output = 0;
 float roll_output = 0;
 float yaw_output = 0;
 
+float yaw_target = 0;
 
-PID pidPitchRate(&gyro[1], &pitch_output, &RCpitch, 0.1, 0, 0, REVERSE);
-PID pidRollRate(&gyro[0], &roll_output, &RCroll, 0.1, 0, 0, DIRECT);
-PID pidYawRate(&gyro[2], &yaw_output, &RCyaw, 0.1, 0, 0, REVERSE);
+PID pidPitchStable(&RCpitch, &pitch_stab_output, &pitch, 4.5, 0, 0, REVERSE);
+PID pidRollStable(&RCroll, &roll_stab_output, &roll, 4.5, 0, 0, REVERSE);
+//PID pidYawStable(&RCyaw, &yaw_stab_output, &yaw, 6, 0, 0, REVERSE);
+
+PID pidPitchRate(&gyro[1], &pitch_output, &pitch_stab_output, 0.01, 0, 0, REVERSE);
+PID pidRollRate(&gyro[0], &roll_output, &roll_stab_output, 0.01, 0, 0, DIRECT);
+//PID pidYawRate(&gyro[2], &yaw_output, &yaw_stab_output, 0.01, 0, 0, REVERSE);
 
 
 void setup() {
@@ -207,7 +215,8 @@ void setup() {
     PCintPort::attachInterrupt(A12, calcChannel4, CHANGE);
     setupAHRS();
     initPids();
-    setPidsOutputLimits(-40, 40);
+    setRatePidsOutputLimits(-40, 40);
+    setStablePidsOutputLimits(-150, 150);
 }
 
 void loop() {
@@ -264,14 +273,14 @@ void loop() {
       Serial.print(" |||||  ");
 
       //calc engine values
-      long motor_FR_output = RCthrottle - RCroll - RCpitch - RCyaw;
-      long motor_RL_output = RCthrottle + RCroll + RCpitch - RCyaw;
-      long motor_FL_output = RCthrottle + RCroll - RCpitch + RCyaw;
-      long motor_RR_output = RCthrottle - RCroll + RCpitch + RCyaw; 
+      long motor_FR_output = RCthrottle - roll_output - pitch_output - yaw_output;
+      long motor_RL_output = RCthrottle + roll_output + pitch_output - yaw_output;
+      long motor_FL_output = RCthrottle + roll_output - pitch_output + yaw_output;
+      long motor_RR_output = RCthrottle - roll_output + pitch_output + yaw_output; 
       
       // PRINT FOR TESTING******************************************************
       //Serial.print("RC in (#typr): "); Serial.print(RCthrottle); Serial.print(", "); Serial.print(RCyaw); Serial.print(", "); Serial.print(RCpitch); Serial.print(", "); Serial.print(RCroll); Serial.print("   "); 
-      //Serial.print("EngOut: fr: "); Serial.print(motor_FR_output); Serial.print(" fl:"); Serial.print(motor_FL_output); Serial.print(" rr:"); Serial.print(motor_RR_output); Serial.print(" rl:"); Serial.print(motor_RL_output); Serial.print("   ");
+      Serial.print("EngOut: fr: "); Serial.print(motor_FR_output); Serial.print(" fl:"); Serial.print(motor_FL_output); Serial.print(" rr:"); Serial.print(motor_RR_output); Serial.print(" rl:"); Serial.print(motor_RL_output); Serial.print("   ");
       // PRINT FOR TESTING******************************************************
 
       //send engine values
@@ -296,33 +305,51 @@ void loop() {
 } // loop()
 
 void computePids(){
+  pidPitchStable.Compute();
+  pidRollStable.Compute();
+  //pidYawStable.Compute();
   pidPitchRate.Compute();
   pidRollRate.Compute();
-  pidYawRate.Compute();
+  //pidYawRate.Compute();
 }
 
 void initPids(){
+  pidPitchStable.SetMode(AUTOMATIC);
+  pidRollStable.SetMode(AUTOMATIC);
+  //pidYawStable.SetMode(AUTOMATIC);
   pidPitchRate.SetMode(AUTOMATIC);
   pidRollRate.SetMode(AUTOMATIC);
-  pidYawRate.SetMode(AUTOMATIC);
+  //pidYawRate.SetMode(AUTOMATIC);
 }
 
 void resetPids(){
+  pidPitchStable.Reset();
+  pidRollStable.Reset();
+  //pidYawStable.Reset();
   pidPitchRate.Reset();
   pidRollRate.Reset();
-  pidYawRate.Reset();
+  //pidYawRate.Reset();
 }
 
-void setPidsOutputLimits(float low, float high){
+void setRatePidsOutputLimits(float low, float high){
   pidPitchRate.SetOutputLimits(low, high);
   pidRollRate.SetOutputLimits(low, high);
-  pidYawRate.SetOutputLimits(low, high);
+  //pidYawRate.SetOutputLimits(low, high);
+}
+
+void setStablePidsOutputLimits(float low, float high){
+  pidPitchStable.SetOutputLimits(low, high);
+  pidRollStable.SetOutputLimits(low, high);
+  //pidYawStable.SetOutputLimits(low, high);
 }
 
 void setPidsSampleTime(int time){ //millis
+  pidPitchStable.SetSampleTime(50);
+  pidRollStable.SetSampleTime(50);
+  //pidYawStable.SetSampleTime(50);
   pidPitchRate.SetSampleTime(50);
   pidRollRate.SetSampleTime(50);
-  pidYawRate.SetSampleTime(50);
+  //pidYawRate.SetSampleTime(50);
 }
 
 //---------------------------------------------------
