@@ -550,6 +550,7 @@ void loopAHRS()
       Normalize();
       Drift_correction();
       Euler_angles();
+      Update_degree_variables();
       
       if (output_stream_on || output_single_on) output_angles();
     }

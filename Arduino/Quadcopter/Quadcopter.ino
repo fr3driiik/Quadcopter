@@ -174,10 +174,14 @@ int num_accel_errors = 0;
 int num_magn_errors = 0;
 int num_gyro_errors = 0;
 
-// Euler angles
+// Euler angles (radians)
 float yaw;
 float pitch;
 float roll;
+
+float yawDegrees;
+float pitchDegrees;
+float rollDegrees;
 
 //---------------------------------------------
 //---------------------------------------------
@@ -194,9 +198,9 @@ float yaw_output = 0;
 
 float yaw_target = 0;
 
-PID pidPitchStable(&RCpitch, &pitch_stab_output, &pitch, 4.5, 0, 0, REVERSE);
-PID pidRollStable(&RCroll, &roll_stab_output, &roll, 4.5, 0, 0, REVERSE);
-//PID pidYawStable(&RCyaw, &yaw_stab_output, &yaw, 6, 0, 0, REVERSE);
+PID pidPitchStable(&pitchDegrees, &pitch_stab_output, &RCpitch, 4.5, 0, 0, REVERSE);
+PID pidRollStable(&rollDegrees, &roll_stab_output, &RCroll, 4.5, 0, 0, REVERSE);
+//PID pidYawStable(&yawDegrees, &yaw_stab_output, &RCyaw, 6, 0, 0, REVERSE);
 
 PID pidPitchRate(&gyro[1], &pitch_output, &pitch_stab_output, 0.01, 0, 0, REVERSE);
 PID pidRollRate(&gyro[0], &roll_output, &roll_stab_output, 0.01, 0, 0, DIRECT);
@@ -215,8 +219,8 @@ void setup() {
     PCintPort::attachInterrupt(A12, calcChannel4, CHANGE);
     setupAHRS();
     initPids();
-    setRatePidsOutputLimits(-40, 40);
-    setStablePidsOutputLimits(-150, 150);
+    setRatePidsOutputLimits(-40, 40); //direct engine influence
+    setStablePidsOutputLimits(-202.5, 202.5); //max degrees per second to get right degree
 }
 
 void loop() {
@@ -269,8 +273,12 @@ void loop() {
       computePids();
 
       Serial.print("pid: ");
-      Serial.print(yaw_output);
-      Serial.print(" |||||  ");
+      Serial.print(gyro[0]);
+      Serial.print(" | ");
+      Serial.print(pitchDegrees);
+      Serial.print(" | ");
+      Serial.print(RCpitch);
+
 
       //calc engine values
       long motor_FR_output = RCthrottle - roll_output - pitch_output - yaw_output;
