@@ -93,5 +93,8 @@ void Update_degree_variables(){
   pitchDegrees = TO_DEG(pitch);
   rollDegrees = TO_DEG(roll);
   yawDegrees = TO_DEG(yaw);
+  gyroDegrees[0] = gyro[0] * GYRO_GAIN;
+  gyroDegrees[1] = gyro[1] * GYRO_GAIN;
+  gyroDegrees[2] = gyro[2] * GYRO_GAIN;
 }
 

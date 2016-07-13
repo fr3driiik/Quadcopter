@@ -396,10 +396,7 @@ char readChar()
 }
 
 void setupAHRS()
-{
-  // Init serial output
-  Serial.begin(OUTPUT__BAUD_RATE);
-  
+{  
   // Init status LED
   pinMode (STATUS_LED_PIN, OUTPUT);
   digitalWrite(STATUS_LED_PIN, LOW);

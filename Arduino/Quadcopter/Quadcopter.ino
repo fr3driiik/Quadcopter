@@ -196,19 +196,21 @@ float pitch_output = 0;
 float roll_output = 0;
 float yaw_output = 0;
 
+float gyroDegrees[3];
+
 float yaw_target = 0;
 
-PID pidPitchStable(&pitchDegrees, &pitch_stab_output, &RCpitch, 4.5, 0, 0, REVERSE);
-PID pidRollStable(&rollDegrees, &roll_stab_output, &RCroll, 4.5, 0, 0, REVERSE);
+PID pidPitchStable(&pitchDegrees, &pitch_stab_output, &RCpitch, 4.5, 0, 0, DIRECT);
+PID pidRollStable(&rollDegrees, &roll_stab_output, &RCroll, 4.5, 0, 0, DIRECT);
 //PID pidYawStable(&yawDegrees, &yaw_stab_output, &RCyaw, 6, 0, 0, REVERSE);
 
-PID pidPitchRate(&gyro[1], &pitch_output, &pitch_stab_output, 0.01, 0, 0, REVERSE);
-PID pidRollRate(&gyro[0], &roll_output, &roll_stab_output, 0.01, 0, 0, DIRECT);
-//PID pidYawRate(&gyro[2], &yaw_output, &yaw_stab_output, 0.01, 0, 0, REVERSE);
+PID pidPitchRate(&gyroDegrees[1], &pitch_output, &pitch_stab_output, 0.01, 0, 0, REVERSE);
+PID pidRollRate(&gyroDegrees[0], &roll_output, &roll_stab_output, 0.01, 0, 0, DIRECT);
+//PID pidYawRate(&gyroDegrees[2], &yaw_output, &yaw_stab_output, 0.01, 0, 0, REVERSE);
 
 
 void setup() {
-    Serial.begin(9600);
+    Serial.begin(OUTPUT__BAUD_RATE);
     pinMode(CHANNEL1_IN_PIN, INPUT);
     pinMode(CHANNEL2_IN_PIN, INPUT);
     pinMode(CHANNEL3_IN_PIN, INPUT);
@@ -271,14 +273,6 @@ void loop() {
 
       //calc pids
       computePids();
-
-      Serial.print("pid: ");
-      Serial.print(gyro[0]);
-      Serial.print(" | ");
-      Serial.print(pitchDegrees);
-      Serial.print(" | ");
-      Serial.print(RCpitch);
-
 
       //calc engine values
       long motor_FR_output = RCthrottle - roll_output - pitch_output - yaw_output;
