@@ -520,7 +520,7 @@ void loopAHRS()
   }
 
   // Time to read the sensors again?
-  if((millis() - timestamp) >= OUTPUT__DATA_INTERVAL)
+  if(true) //(millis() - timestamp) >= OUTPUT__DATA_INTERVAL) main loop regulates this now
   {
     timestamp_old = timestamp;
     timestamp = millis();

@@ -13,9 +13,12 @@
  * I2C device found at address 0x41  ! = BMA180 accelerometer
  * I2C device found at address 0x42  ! = 0b 0100 0010
  * I2C device found at address 0x68  ! = ITG3050 gyro
- * I2C device found at address 0x76  ! = 0b 0111 0110
+ * I2C device found at address 0x76  ! = MS5611 Altimeter
  * 
+ * Använder arduinos inbyggda watchDogTimer
  */
+#include <Arduino.h>
+#include <avr/wdt.h>
 
 #include <PinChangeInt.h>
 #include <PID_v1.h>
@@ -78,6 +81,9 @@ float RCroll = 0;
 float RCpitch = 0;
 float RCthrottle = 0;
 float RCyaw = 0;
+
+//loop variables
+unsigned long timer;
 
 //------AA-------HH----HH---RRRR---------SSSS---
 //-----AAAA------HH----HH---RR--RR-----SS------
@@ -202,15 +208,21 @@ float yaw_target = 0;
 
 PID pidPitchStable(&pitchDegrees, &pitch_stab_output, &RCpitch, 4.5, 0, 0, DIRECT);
 PID pidRollStable(&rollDegrees, &roll_stab_output, &RCroll, 4.5, 0, 0, DIRECT);
-//PID pidYawStable(&yawDegrees, &yaw_stab_output, &RCyaw, 6, 0, 0, REVERSE);
+PID pidYawStable(&yawDegrees, &yaw_stab_output, &yaw_target, 6, 0, 0, REVERSE); //yaw_target is wrapped 180deg before this is computed
 
-PID pidPitchRate(&gyroDegrees[1], &pitch_output, &pitch_stab_output, 0.01, 0, 0, REVERSE);
-PID pidRollRate(&gyroDegrees[0], &roll_output, &roll_stab_output, 0.01, 0, 0, DIRECT);
-//PID pidYawRate(&gyroDegrees[2], &yaw_output, &yaw_stab_output, 0.01, 0, 0, REVERSE);
+PID pidPitchRate(&gyroDegrees[1], &pitch_output, &pitch_stab_output, 0.05, 0.1, 0, REVERSE);
+PID pidRollRate(&gyroDegrees[0], &roll_output, &roll_stab_output, 0.05, 0.1, 0, DIRECT);
+PID pidYawRate(&gyroDegrees[2], &yaw_output, &yaw_stab_output, 0, 0, 0, DIRECT); //off for now
+
+
+//FAILSAFE var
+boolean failsafe;
 
 
 void setup() {
+    wdt_disable();
     Serial.begin(OUTPUT__BAUD_RATE);
+    Serial.println("\nInitializing..");
     pinMode(CHANNEL1_IN_PIN, INPUT);
     pinMode(CHANNEL2_IN_PIN, INPUT);
     pinMode(CHANNEL3_IN_PIN, INPUT);
@@ -223,6 +235,8 @@ void setup() {
     initPids();
     setRatePidsOutputLimits(-40, 40); //direct engine influence
     setStablePidsOutputLimits(-202.5, 202.5); //max degrees per second to get right degree
+    Serial.println("Ready for takeoff!");
+    wdt_enable(WDTO_2S);
 }
 
 void loop() {
@@ -233,12 +247,19 @@ void loop() {
     static uint16_t throttleIn;
 
     if(timeOfLastTransmission == 0 || (micros() - timeOfLastTransmission) > FAILSAFE_DELAY){ //transmitter not connected
-        Serial.println("FAILSAFE");
-        //run engines at proper level
-        return;
-    } //transmitter not connected
+        failsafe = true; //transmitter not connected
+
+        //make stable
+        RCroll = 0; 
+        RCpitch = 0;
+
+        //set throttle
+        RCthrottle = ESC_MIN; //engine shutoff
+    }else{ 
+      failsafe = false;
+    }
     
-    if(channelFlagsShared){ //handle interupted pins
+    if(channelFlagsShared && !failsafe){ //handle interupted pins
         noInterrupts();
 
         //copy changed shared variables
@@ -263,7 +284,7 @@ void loop() {
         RCroll = map(rollIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
         RCpitch = -map(pitchIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
         RCthrottle = map(throttleIn, RCRECIEVER_MIN, RCRECIEVER_MAX, ESC_MIN, ESC_MAX);
-        RCyaw = map(yawIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -135, 135);   
+        RCyaw = -map(yawIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -135, 135);   
         
     } //handle interupted pins
 
@@ -271,20 +292,34 @@ void loop() {
 
     if(RCthrottle > 140){ //calc PIDS and run engines accordingly
 
-      //calc pids
-      computePids();
+      //calc stab pids
+      computeStabPids();
+
+      //yaw change desired? overwrite stab output
+      if(abs(RCyaw) > 5){
+        yaw_stab_output = RCyaw;
+        yaw_target = yawDegrees;
+      }
+
+      //calc stab pids
+      computeRatePids();
 
       //calc engine values
       long motor_FR_output = RCthrottle - roll_output - pitch_output - yaw_output;
       long motor_RL_output = RCthrottle + roll_output + pitch_output - yaw_output;
       long motor_FL_output = RCthrottle + roll_output - pitch_output + yaw_output;
       long motor_RR_output = RCthrottle - roll_output + pitch_output + yaw_output; 
+
+      motor_FR_output = constrain(motor_FR_output, ESC_MIN, ESC_MAX);
+      motor_RL_output = constrain(motor_RL_output, ESC_MIN, ESC_MAX);
+      motor_FL_output = constrain(motor_FL_output, ESC_MIN, ESC_MAX);
+      motor_RR_output = constrain(motor_RR_output, ESC_MIN, ESC_MAX);
       
       // PRINT FOR TESTING******************************************************
       //Serial.print("RC in (#typr): "); Serial.print(RCthrottle); Serial.print(", "); Serial.print(RCyaw); Serial.print(", "); Serial.print(RCpitch); Serial.print(", "); Serial.print(RCroll); Serial.print("   "); 
       Serial.print("EngOut: fr: "); Serial.print(motor_FR_output); Serial.print(" fl:"); Serial.print(motor_FL_output); Serial.print(" rr:"); Serial.print(motor_RR_output); Serial.print(" rl:"); Serial.print(motor_RL_output); Serial.print("   ");
       // PRINT FOR TESTING******************************************************
-
+  
       //send engine values
       analogWrite(MOTOR_FR_OUT_PIN, motor_FR_output);
       analogWrite(MOTOR_RL_OUT_PIN, motor_RL_output);
@@ -296,62 +331,91 @@ void loop() {
       analogWrite(MOTOR_RL_OUT_PIN, ESC_MIN);
       analogWrite(MOTOR_FL_OUT_PIN, ESC_MIN);
       analogWrite(MOTOR_RR_OUT_PIN, ESC_MIN);
-      Serial.print("Throttle too low to run engines.   ");
+      Serial.print("Engines off   ");
+
+      //reset yaw
+      yaw_target = yawDegrees;
 
       //reset pids
       resetPids();
     }
+
+    //stable hz, wait for desired time
+    while(true){
+      long timePassed = millis() - timer;
+      if(timePassed >= OUTPUT__DATA_INTERVAL){
+        break;
+      }
+      //wait..
+      Serial.print(" ");
+      Serial.print(timePassed);
+      Serial.print(" ");
+    }
+    timer = millis();
+    wdt_reset(); //we are still alive
     
 
     
 } // loop()
 
-void computePids(){
+void computeStabPids(){
   pidPitchStable.Compute();
   pidRollStable.Compute();
-  //pidYawStable.Compute();
+
+  //wrap yaw_target - yawDegrees so we turn the shortest way (and don't go crazy around -179deg & +179deg)
+  float diffDegrees = yaw_target - yawDegrees;
+  if(diffDegrees < -180){
+    yaw_target += 360;
+  }else if(diffDegrees > 180){
+    yaw_target -= 360;
+  }
+  
+  pidYawStable.Compute();
+}
+
+void computeRatePids(){
   pidPitchRate.Compute();
   pidRollRate.Compute();
-  //pidYawRate.Compute();
+  pidYawRate.Compute();
 }
 
 void initPids(){
   pidPitchStable.SetMode(AUTOMATIC);
   pidRollStable.SetMode(AUTOMATIC);
-  //pidYawStable.SetMode(AUTOMATIC);
+  pidYawStable.SetMode(AUTOMATIC);
   pidPitchRate.SetMode(AUTOMATIC);
   pidRollRate.SetMode(AUTOMATIC);
-  //pidYawRate.SetMode(AUTOMATIC);
+  pidYawRate.SetMode(AUTOMATIC);
 }
 
 void resetPids(){
   pidPitchStable.Reset();
   pidRollStable.Reset();
-  //pidYawStable.Reset();
+  pidYawStable.Reset();
   pidPitchRate.Reset();
   pidRollRate.Reset();
-  //pidYawRate.Reset();
+  pidYawRate.Reset();
 }
 
 void setRatePidsOutputLimits(float low, float high){
   pidPitchRate.SetOutputLimits(low, high);
   pidRollRate.SetOutputLimits(low, high);
-  //pidYawRate.SetOutputLimits(low, high);
+  pidYawRate.SetOutputLimits(low, high);
 }
 
 void setStablePidsOutputLimits(float low, float high){
   pidPitchStable.SetOutputLimits(low, high);
   pidRollStable.SetOutputLimits(low, high);
-  //pidYawStable.SetOutputLimits(low, high);
+  pidYawStable.SetOutputLimits(low, high);
 }
 
 void setPidsSampleTime(int time){ //millis
-  pidPitchStable.SetSampleTime(50);
-  pidRollStable.SetSampleTime(50);
-  //pidYawStable.SetSampleTime(50);
-  pidPitchRate.SetSampleTime(50);
-  pidRollRate.SetSampleTime(50);
-  //pidYawRate.SetSampleTime(50);
+  pidPitchStable.SetSampleTime(20);
+  pidRollStable.SetSampleTime(20);
+  //pidYawStable.SetSampleTime(20);
+  pidPitchRate.SetSampleTime(20);
+  pidRollRate.SetSampleTime(20);
+  //pidYawRate.SetSampleTime(20);
 }
 
 //---------------------------------------------------
