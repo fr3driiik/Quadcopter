@@ -2,30 +2,30 @@
 #define PIDS_H
 #include <PID_v1.h>
 
-extern float yawDegrees = 0;
-extern float pitchDegrees = 0;
-extern float rollDegrees = 0;
+float yawDegrees = 0;
+float pitchDegrees = 0;
+float rollDegrees = 0;
 
 //PIDs and their variables
 float pitch_stab_output = 0;
 float roll_stab_output = 0;
 float yaw_stab_output = 0;
 
-extern float pitch_output = 0;
-extern float roll_output = 0;
-extern float yaw_output = 0;
+float pitch_output = 0;
+float roll_output = 0;
+float yaw_output = 0;
 
 float gyroDegrees[3];
 
-extern float yaw_target = 0;
+float yaw_target = 0;
 
-extern PID pidPitchStable(&pitchDegrees, &pitch_stab_output, &RCpitch, 4.5, 0.0, 0.0, DIRECT);
-extern PID pidRollStable(&rollDegrees, &roll_stab_output, &RCroll, 4.5, 0.0, 0.0, DIRECT);
-extern PID pidYawStable(&yawDegrees, &yaw_stab_output, &yaw_target, 6, 0.0, 0.0, REVERSE); //yaw_target is wrapped 180deg before this is computed
+PID pidPitchStable(&pitchDegrees, &pitch_stab_output, &RCpitch, 4.5, 0.0, 0.0, DIRECT);
+PID pidRollStable(&rollDegrees, &roll_stab_output, &RCroll, 4.5, 0.0, 0.0, DIRECT);
+PID pidYawStable(&yawDegrees, &yaw_stab_output, &yaw_target, 6, 0.0, 0.0, REVERSE); //yaw_target is wrapped 180deg before this is computed
 
-extern PID pidPitchRate(&gyroDegrees[1], &pitch_output, &pitch_stab_output, 0.05, 0.1, 0.0, REVERSE);
-extern PID pidRollRate(&gyroDegrees[0], &roll_output, &roll_stab_output, 0.05, 0.1, 0.0, DIRECT);
-extern PID pidYawRate(&gyroDegrees[2], &yaw_output, &yaw_stab_output, 0, 0.0, 0.0, DIRECT); //off for now
+PID pidPitchRate(&gyroDegrees[1], &pitch_output, &pitch_stab_output, 0.05, 0.1, 0.0, REVERSE);
+PID pidRollRate(&gyroDegrees[0], &roll_output, &roll_stab_output, 0.05, 0.1, 0.0, DIRECT);
+PID pidYawRate(&gyroDegrees[2], &yaw_output, &yaw_stab_output, 0, 0.0, 0.0, DIRECT); //off for now
 
 void computeStabPids(){
   pidPitchStable.Compute();
@@ -88,3 +88,4 @@ void setPidsSampleTime(int time){ //millis
 }
 
 #endif
+

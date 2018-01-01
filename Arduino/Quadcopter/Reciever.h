@@ -57,7 +57,7 @@ uint16_t rollIn;
 uint16_t throttleIn;
 
 //shared variables are updated by the ISR and ONLY read by the loop
-//¤add for all channels!!!¤
+//Â¤add for all channels!!!Â¤
 volatile uint16_t pitchInShared;
 volatile uint16_t yawInShared;
 volatile uint16_t rollInShared;
@@ -164,3 +164,4 @@ void loopReceiver() {
 }
 
 #endif
+

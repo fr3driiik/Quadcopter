@@ -1,9 +1,9 @@
 /*Quadcopter!
  * 
  * ESC settings:
- * stop/arm   1060 µs = 132 analogWrite Value
- * full power 1860 µs = 232,407 analogWrite Value. Detta ger endast 100 steg, har möjlighet för 800st
- * PWM freq for pin 3, 5, 6, 9 (timer 2, 3, 4) = 490 Hz, every Pulse = 2040.8163265306 µs
+ * stop/arm   1060 Âµs = 132 analogWrite Value
+ * full power 1860 Âµs = 232,407 analogWrite Value. Detta ger endast 100 steg, har mÃ¶jlighet fÃ¶r 800st
+ * PWM freq for pin 3, 5, 6, 9 (timer 2, 3, 4) = 490 Hz, every Pulse = 2040.8163265306 Âµs
  * analogWrite(pin, value), 0 off, 255 on
  * 
  * RC reviever 8 ch PIN: 31, 33, 35, 37, 39, 41, 43, 45
@@ -15,7 +15,7 @@
  * I2C device found at address 0x68  ! = ITG3050 gyro
  * I2C device found at address 0x76  ! = MS5611 Altimeter
  * 
- * Använder arduinos inbyggda watchDogTimer
+ * AnvÃ¤nder arduinos inbyggda watchDogTimer
  */
 #include <Arduino.h>
 #include <avr/wdt.h>
@@ -140,4 +140,5 @@ void loop() {
 long map(long x, long in_min, long in_max, long out_min, long out_max){
   return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
 }
+
 
