@@ -25,6 +25,7 @@
 #include "Sensors.h"
 #include "Reciever.h"
 #include "PIDs.h"
+#include "GPS.h"
 #include "Output.h"
 
 #define DESIRED_HZ 50 //100 without prints
@@ -33,6 +34,7 @@
 #define OUTPUT__BAUD_RATE 57600
 #define DEBUG_OUTPUT false
 #define PRINT_SENSOR_DATA true
+#define PRINT_GPS_DATA true
 
 unsigned long timer;
 
@@ -54,17 +56,23 @@ void setup() {
     Serial.println("\nInitializing..");
     Wire.begin();
     init_sensors();
+    init_gps();
     initialize_receiver();
     initPids();
     setRatePidsOutputLimits(-40, 40); //direct engine influence
     setStablePidsOutputLimits(-202.5, 202.5); //max degrees per second to get right degree
     Serial.println("Ready for takeoff!");
-    wdt_enable(WDTO_2S);
+    wdt_enable(WDTO_500MS);
     timer = millis();
 }
 
 void loop() {       
     read_sensors();
+    if (read_gps()) {
+      #if PRINT_GPS_DATA
+        print_gps();
+      #endif
+    } else 
     //FILTER THE DATA
     #if PRINT_SENSOR_DATA
       print_sensor_data();
@@ -132,9 +140,6 @@ void loop() {
 
     timer = millis();
     wdt_reset(); //we are still alive  
-    #if (DEBUG_OUTPUT || PRINT_PYR || PRINT_SENSOR_DATA)
-      Serial.println("");
-    #endif
 } // loop()
 
 long map(long x, long in_min, long in_max, long out_min, long out_max){
