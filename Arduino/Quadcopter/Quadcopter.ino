@@ -11,7 +11,7 @@
  * Sensorsticka I2C:
  * I2C device found at address 0x1E  ! = HMC5883L magnetometer
  * I2C device found at address 0x41  ! = BMA180 accelerometer
- * I2C device found at address 0x42  ! = 0b 0100 0010, ublox m8n GPS
+ * I2C device found at address 0x42  ! = 0b 0100 0010, ublox m8n GPS, uses serial1 instead
  * I2C device found at address 0x68  ! = ITG3050 gyro
  * I2C device found at address 0x76  ! = MS5611 Altimeter
  * 
@@ -26,15 +26,19 @@
 #include "Reciever.h"
 #include "PIDs.h"
 #include "GPS.h"
+#include "Utils.h"
 #include "Output.h"
 
-#define DESIRED_HZ 50 //100 without prints
+#define I2C_SPEED 400000 //400kHz = fast mode
+#define DESIRED_HZ 200 //5ms
 #define AVAIL_LOOP_TIME (1000 / DESIRED_HZ) //millis
 
-#define OUTPUT__BAUD_RATE 57600
+#define OUTPUT__BAUD_RATE 115200
 #define DEBUG_OUTPUT false
-#define PRINT_SENSOR_DATA true
-#define PRINT_GPS_DATA true
+#define PRINT_SENSOR_DATA false
+#define PRINT_PYR_DATA true
+#define PRINT_GPS_DATA false
+#define PRINT_LOOP_TIME_OVER false
 
 unsigned long timer;
 
@@ -55,6 +59,7 @@ void setup() {
     Serial.begin(OUTPUT__BAUD_RATE);
     Serial.println("\nInitializing..");
     Wire.begin();
+    Wire.setClock(I2C_SPEED);
     init_sensors();
     init_gps();
     initialize_receiver();
@@ -62,6 +67,7 @@ void setup() {
     setRatePidsOutputLimits(-40, 40); //direct engine influence
     setStablePidsOutputLimits(-202.5, 202.5); //max degrees per second to get right degree
     Serial.println("Ready for takeoff!");
+    IMU_init();
     wdt_enable(WDTO_500MS);
     timer = millis();
 }
@@ -72,8 +78,11 @@ void loop() {
       #if PRINT_GPS_DATA
         print_gps();
       #endif
-    } else 
-    //FILTER THE DATA
+    }
+    IMU_calculate();
+    #if PRINT_PYR_DATA
+      print_pyr();
+    #endif
     #if PRINT_SENSOR_DATA
       print_sensor_data();
     #endif
@@ -126,6 +135,9 @@ void loop() {
 
     //stable hz, wait for desired time
     bool loopTimeExceded = true;
+    #if PRINT_LOOP_TIME_OVER
+      Serial.print("w8:");Serial.print(AVAIL_LOOP_TIME - (millis() - timer));Serial.println();
+    #endif
     while(true){
       long timePassed = millis() - timer;
       if (timePassed >= AVAIL_LOOP_TIME){
@@ -135,15 +147,9 @@ void loop() {
       }
     }
     if (loopTimeExceded) {
-      Serial.println("WARNING: Desired Hz could not be reached.");
+      Serial.println("#:LOOP");
     }
 
     timer = millis();
     wdt_reset(); //we are still alive  
 } // loop()
-
-long map(long x, long in_min, long in_max, long out_min, long out_max){
-  return (x - in_min) * (out_max - out_min) / (in_max - in_min) + out_min;
-}
-
-
