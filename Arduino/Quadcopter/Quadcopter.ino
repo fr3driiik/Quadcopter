@@ -118,7 +118,7 @@ void loop() {
       analogWrite(MOTOR_FL_OUT_PIN, motor_FL_output);
       analogWrite(MOTOR_RR_OUT_PIN, motor_RR_output); 
     } else { //too low throttle
-      //send engine values
+      //send arm/stop values
       analogWrite(MOTOR_FR_OUT_PIN, ESC_MIN);
       analogWrite(MOTOR_RL_OUT_PIN, ESC_MIN);
       analogWrite(MOTOR_FL_OUT_PIN, ESC_MIN);
