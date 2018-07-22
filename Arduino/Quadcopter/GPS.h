@@ -1,6 +1,8 @@
 #ifndef GPS_H
 #define GPS_H
 
+#include <Arduino.h>
+
 const unsigned char UBX_HEADER[] = {0xB5, 0x62};
 
 struct NAV_PVT {

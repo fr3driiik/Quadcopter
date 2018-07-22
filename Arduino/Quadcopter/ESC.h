@@ -1,17 +1,19 @@
 #ifndef ESC_H
 #define ESC_H
 
+#include <Arduino.h>
+
 class ESC {
   public:
-    ESC(uint8_t escPin, unsigned int min, unsigned int max);
+    ESC(uint8_t escPin, unsigned int minSignal, unsigned int maxSignal);
     void arm();
     void disarm();
     void setSpeed(float speed); // 0.00-1.00
 
   private:
     uint8_t escPin;
-    unsigned int min, max;
-}
+    unsigned int minSignal, maxSignal;
+};
 
 #endif
 

@@ -63,7 +63,6 @@ void setup() {
     init_sensors();
     init_gps();
     initialize_receiver();
-    initPids();
     setRatePidsOutputLimits(-40, 40); //direct engine influence
     setStablePidsOutputLimits(-202.5, 202.5); //max degrees per second to get right degree
     Serial.println("Ready for takeoff!");
@@ -72,7 +71,9 @@ void setup() {
     timer = millis();
 }
 
-void loop() {       
+void loop() {    
+    float deltaTime = (millis() - timer) / 1000.0000f;
+    timer = millis();
     read_sensors();
     if (read_gps()) {
       #if PRINT_GPS_DATA
@@ -90,7 +91,7 @@ void loop() {
     if(RCthrottle > 140){ //calc PIDS and run engines accordingly
 
       //calc stab pids
-      computeStabPids();
+      computeStabPids(deltaTime);
 
       //yaw change desired? overwrite stab output
       if(abs(RCyaw) > 5){
@@ -99,7 +100,7 @@ void loop() {
       }
 
       //calc stab pids
-      computeRatePids();
+      computeRatePids(deltaTime);
 
       //calc engine values
       long motor_FR_output = RCthrottle - roll_output - pitch_output - yaw_output;
@@ -150,6 +151,5 @@ void loop() {
       Serial.println("#:LOOP");
     }
 
-    timer = millis();
     wdt_reset(); //we are still alive  
 } // loop()

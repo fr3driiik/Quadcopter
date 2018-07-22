@@ -1,4 +1,3 @@
-#include "Arduino.h"
 #include "GPS.h"
 
 NAV_PVT pvt;
