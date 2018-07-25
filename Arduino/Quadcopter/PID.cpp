@@ -2,21 +2,21 @@
 
 PID::PID(float* input, float* target, float* output, float kp, float ki, float kd, bool revert) : input(input), target(target), output(output), kp(kp), ki(ki), kd(kd) {
   sign = revert ? -1 : 1;
-  lowLimit = -3.4028235e38;
-  highLimit = 3.4028234e38;
+  integralLowLimit = -3.4028235e38;
+  integralHighLimit = 3.4028234e38;
 }
 
 void PID::calculate(float deltaTime) {
   float error = *target - *input;
-  integral += error * deltaTime;
+  integral = constrain(integral + error * deltaTime, integralLowLimit, integralHighLimit);
   float derivative = (error - previousError) / deltaTime;
-  *output = constrain((kp * error + ki * integral + kd * derivative) * sign, lowLimit, highLimit);
+  *output = (kp * error + ki * integral + kd * derivative) * sign;
   previousError = error;
 }
 
-void PID::setOutputLimits(float lowLimit, float highLimit) {
-  this->lowLimit = lowLimit;
-  this->highLimit = highLimit;
+void PID::setIntegralLimits(float integralLowLimit, float integralHighLimit) {
+  this->integralLowLimit = integralLowLimit;
+  this->integralHighLimit = integralHighLimit;
 }
 
 void PID::reset() {

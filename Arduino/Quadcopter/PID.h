@@ -9,10 +9,10 @@ class PID {
     PID(float *input, float *target, float *output, float kp, float ki, float kd, bool revert);
     void reset();
     void calculate(float deltaTime);
-    void setOutputLimits(float lowLimit, float highLimit);
+    void setIntegralLimits(float lowLimit, float highLimit);
   private:
     float *input, *target, *output;
-    float kp, ki, kd, integral, previousError, lowLimit, highLimit;
+    float kp, ki, kd, integral, previousError, integralLowLimit, integralHighLimit;
     uint8_t sign;
 };
 

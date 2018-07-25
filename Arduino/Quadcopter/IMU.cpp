@@ -2,8 +2,6 @@
 
 #define LP_FACTOR 0.02f
 #define HP_FACTOR (float) (1.00f - LP_FACTOR)
-#define RAD_TO_DEG 180.0f / PI;
-#define DEG_TO_RAD PI / 180.0f
 
 Orientation orientation;
 float height;
@@ -41,15 +39,15 @@ void IMU_calculate() {
     //compensate yaw drift with magnetometer 
     //https://github.com/jarzebski/Arduino-HMC5883L/blob/master/HMC5883L_compensation_MPU6050/HMC5883L_compensation_MPU6050.ino
     if (!(orientation.roll > 45 || orientation.roll < -45 || orientation.pitch > 45 || orientation.pitch < -45)) {
-      float pitchRad = orientation.pitch * DEG_TO_RAD;
-      float rollRad = orientation.roll * DEG_TO_RAD;
+      float pitchRad = orientation.pitch * DEGREES_TO_RADIANS;
+      float rollRad = orientation.roll * DEGREES_TO_RADIANS;
       float cosRoll = cos(rollRad);
       float sinRoll = sin(rollRad);
       float cosPitch = cos(pitchRad);
       float sinPitch = sin(pitchRad);
       float xh = magnetom[ROLL] * cosPitch + magnetom[YAW] * sinPitch;
       float yh = magnetom[ROLL] * sinRoll * sinPitch + magnetom[PITCH] * cosRoll - magnetom[YAW] * sinRoll * cosPitch;
-      orientation.yaw = atan2(yh, xh) * RAD_TO_DEG;
+      orientation.yaw = atan2(yh, xh) * RADIANS_TO_DEGREES;
     }
   #endif
 

@@ -21,7 +21,6 @@
 #include <avr/wdt.h>
 #include <Wire.h>
 
-#include "PinChangeInt.h"
 #include "Sensors.h"
 #include "Reciever.h"
 #include "PIDs.h"
@@ -63,8 +62,8 @@ void setup() {
     init_sensors();
     init_gps();
     initialize_receiver();
-    setRatePidsOutputLimits(-40, 40); //direct engine influence
-    setStablePidsOutputLimits(-202.5, 202.5); //max degrees per second to get right degree
+    setRatePidsIntegralLimits(-40, 40); //direct engine influence
+    setStablePidsIntegralLimits(-202.5, 202.5); //max degrees per second to get right degree
     Serial.println("Ready for takeoff!");
     IMU_init();
     wdt_enable(WDTO_500MS);

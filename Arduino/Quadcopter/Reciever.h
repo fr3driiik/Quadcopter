@@ -1,15 +1,8 @@
 #ifndef RECIEVER_H
 #define RECIEVER_H
 
-//inputsPins
-#define CHANNEL1_IN_PIN A15 // ROLL
-#define CHANNEL2_IN_PIN A14 // PITCH
-#define CHANNEL3_IN_PIN A13 // THROTTLE
-#define CHANNEL4_IN_PIN A12 // YAW
-#define CHANNEL5_IN_PIN A11
-#define CHANNEL6_IN_PIN A10
-#define CHANNEL7_IN_PIN A9
-#define CHANNEL8_IN_PIN A8
+#include <EnableInterrupt.h>
+#include "Config.h"
 
 //flags for channels to indicate new signal
 #define CHANNEL1_FLAG 1
@@ -20,21 +13,6 @@
 #define CHANNEL6_FLAG 32
 #define CHANNEL7_FLAG 64
 #define CHANNEL8_FLAG 128
-
-//outputPins
-#define MOTOR_FR_OUT_PIN 3
-#define MOTOR_RL_OUT_PIN 5
-#define MOTOR_FL_OUT_PIN 6
-#define MOTOR_RR_OUT_PIN 9
-
-//values
-#define ESC_MIN 132
-#define ESC_MAX 232
-#define ESC_MID (ESC_MAX - ESC_MIN)
-
-#define RCRECIEVER_MIN 1050
-#define RCRECIEVER_MAX 1880
-#define FAILSAFE_DELAY 300000 // after 0,3 seconds of no signal on choosen channel, in this case ch3 because ch 4 is receiveing last value..
 
 //FAILSAFE var
 boolean failsafe;
@@ -73,7 +51,7 @@ uint32_t throttleStart;
 //--------------INTERUPT HANDLERS--------------------
 //---------------------------------------------------
 void calcChannel1(){
-    if(digitalRead(CHANNEL1_IN_PIN) == HIGH){ //start of signal
+    if(digitalRead(CHANNEL1_INPUT_PIN) == HIGH){ //start of signal
         rollStart = micros();
     }else{ //signal ended. Save signal and set flag
         rollInShared = (uint16_t)(micros() - rollStart);
@@ -81,7 +59,7 @@ void calcChannel1(){
     }
 }
 void calcChannel2(){
-    if(digitalRead(CHANNEL2_IN_PIN) == HIGH){ //start of signal
+    if(digitalRead(CHANNEL2_INPUT_PIN) == HIGH){ //start of signal
         pitchStart = micros();
     }else{ //signal ended. Save signal and set flag
         pitchInShared = (uint16_t)(micros() - pitchStart);
@@ -89,7 +67,7 @@ void calcChannel2(){
     }
 }
 void calcChannel3(){
-    if(digitalRead(CHANNEL3_IN_PIN) == HIGH){ //start of signal
+    if(digitalRead(CHANNEL3_INPUT_PIN) == HIGH){ //start of signal
         throttleStart = micros();
     }else{ //signal ended. Save signal and set flag
         throttleInShared = (uint16_t)(micros() - throttleStart);
@@ -98,7 +76,7 @@ void calcChannel3(){
     timeOfLastTransmission = micros(); // This channel keeps track of last received transmission
 }
 void calcChannel4(){
-    if(digitalRead(CHANNEL4_IN_PIN) == HIGH){ //start of signal
+    if(digitalRead(CHANNEL4_INPUT_PIN) == HIGH){ //start of signal
         yawStart = micros();
     }else{ //signal ended. Save signal and set flag
         yawInShared = (uint16_t)(micros() - yawStart);
@@ -108,14 +86,14 @@ void calcChannel4(){
 
 //INITIALIZE
 void initialize_receiver() {
-    pinMode(CHANNEL1_IN_PIN, INPUT);
-    pinMode(CHANNEL2_IN_PIN, INPUT);
-    pinMode(CHANNEL3_IN_PIN, INPUT);
-    pinMode(CHANNEL4_IN_PIN, INPUT);
-    PCintPort::attachInterrupt(A15, calcChannel1, CHANGE);
-    PCintPort::attachInterrupt(A14, calcChannel2, CHANGE);
-    PCintPort::attachInterrupt(A13, calcChannel3, CHANGE);
-    PCintPort::attachInterrupt(A12, calcChannel4, CHANGE);
+    pinMode(CHANNEL1_INPUT_PIN, INPUT_PULLUP);
+    pinMode(CHANNEL2_INPUT_PIN, INPUT_PULLUP);
+    pinMode(CHANNEL3_INPUT_PIN, INPUT_PULLUP);
+    pinMode(CHANNEL4_INPUT_PIN, INPUT_PULLUP);
+    enableInterrupt(CHANNEL1_INPUT_PIN, calcChannel1, CHANGE);
+    enableInterrupt(CHANNEL2_INPUT_PIN, calcChannel2, CHANGE);
+    enableInterrupt(CHANNEL3_INPUT_PIN, calcChannel3, CHANGE);
+    enableInterrupt(CHANNEL4_INPUT_PIN, calcChannel4, CHANGE);
 }
 
 void loopReceiver() {

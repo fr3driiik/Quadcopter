@@ -57,16 +57,16 @@ void resetPids(){
   pidYawRate.reset();
 }
 
-void setRatePidsOutputLimits(float low, float high){
-  pidPitchRate.setOutputLimits(low, high);
-  pidRollRate.setOutputLimits(low, high);
-  pidYawRate.setOutputLimits(low, high);
+void setRatePidsIntegralLimits(float low, float high){
+  pidPitchRate.setIntegralLimits(low, high);
+  pidRollRate.setIntegralLimits(low, high);
+  pidYawRate.setIntegralLimits(low, high);
 }
 
-void setStablePidsOutputLimits(float low, float high){
-  pidPitchStable.setOutputLimits(low, high);
-  pidRollStable.setOutputLimits(low, high);
-  pidYawStable.setOutputLimits(low, high);
+void setStablePidsIntegralLimits(float low, float high){
+  pidPitchStable.setIntegralLimits(low, high);
+  pidRollStable.setIntegralLimits(low, high);
+  pidYawStable.setIntegralLimits(low, high);
 }
 
 #endif

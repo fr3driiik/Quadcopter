@@ -15,5 +15,12 @@ class ESC {
     unsigned int minSignal, maxSignal;
 };
 
+struct Engine {
+  //Vector3 position;
+  //Vector3 rotation; //too much
+  float degreesFromFront; //clockWise from forward
+  ESC esc;
+};
+
 #endif
 
