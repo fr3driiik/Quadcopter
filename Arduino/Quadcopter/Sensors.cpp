@@ -36,7 +36,7 @@ int num_accel_errors = 0;
 int num_magn_errors = 0;
 
 void Accel_Init(){
- byte temp[1];
+ byte temp[1]{0};
  byte temp1;
   //
   Wire.beginTransmission(ACCEL_ADDRESS);

@@ -46,8 +46,8 @@ struct NAV_PVT {
   unsigned short magAcc;       // Magnetic declination accuracy
 };
 
-void init_gps();
-NAV_PVT getGPSMessage();
-bool read_gps();
+void GPS_initialize();
+NAV_PVT GPS_getGPSMessage();
+bool GPS_read();
 
 #endif

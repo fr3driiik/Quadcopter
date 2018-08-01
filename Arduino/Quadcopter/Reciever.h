@@ -1,8 +1,15 @@
 #ifndef RECIEVER_H
 #define RECIEVER_H
 
-#include <EnableInterrupt.h>
+#include "Utils.h"
 #include "Config.h"
+#if defined(Arduino_Mega_2560) || defined(Arduino_Pro_Micro)
+  #include <EnableInterrupt.h>
+#endif
+
+/* 
+ * RC reviever 8 ch PIN: 31, 33, 35, 37, 39, 41, 43, 45
+ */
 
 //flags for channels to indicate new signal
 #define CHANNEL1_FLAG 1
@@ -23,19 +30,20 @@ uint32_t timeOfLastTransmission;
 //keeper of the flags above, max 8 channels because 8bits
 volatile uint8_t channelFlagsShared;
 
-//RCinput
-float RCroll = 0;
-float RCpitch = 0;
-float RCthrottle = 0;
-float RCyaw = 0;
+//RCinput signal length in %
+float rollIn = 0;
+float pitchIn = 0;
+float throttleIn = 0;
+float yawIn = 0;
 
-uint16_t pitchIn;
-uint16_t yawIn;
-uint16_t rollIn;
-uint16_t throttleIn;
+//RCinput signal length in micros
+uint16_t pitchInRaw;
+uint16_t yawInRaw;
+uint16_t rollInRaw;
+uint16_t throttleInRaw;
 
-//shared variables are updated by the ISR and ONLY read by the loop
-//Â¤add for all channels!!!Â¤
+//shared variables are updated by the ISR and ONLY read by the loop. Length of signal in micros.
+//Add for all channels!!!
 volatile uint16_t pitchInShared;
 volatile uint16_t yawInShared;
 volatile uint16_t rollInShared;
@@ -85,7 +93,13 @@ void calcChannel4(){
 }
 
 //INITIALIZE
-void initialize_receiver() {
+void Reciever_initialize() {
+  #ifdef Teensy_3_6
+    attachInterrupt(CHANNEL1_INPUT_PIN, calcChannel1, CHANGE);
+    attachInterrupt(CHANNEL2_INPUT_PIN, calcChannel2, CHANGE);
+    attachInterrupt(CHANNEL3_INPUT_PIN, calcChannel3, CHANGE);
+    attachInterrupt(CHANNEL4_INPUT_PIN, calcChannel4, CHANGE);
+  #else
     pinMode(CHANNEL1_INPUT_PIN, INPUT_PULLUP);
     pinMode(CHANNEL2_INPUT_PIN, INPUT_PULLUP);
     pinMode(CHANNEL3_INPUT_PIN, INPUT_PULLUP);
@@ -94,20 +108,21 @@ void initialize_receiver() {
     enableInterrupt(CHANNEL2_INPUT_PIN, calcChannel2, CHANGE);
     enableInterrupt(CHANNEL3_INPUT_PIN, calcChannel3, CHANGE);
     enableInterrupt(CHANNEL4_INPUT_PIN, calcChannel4, CHANGE);
+  #endif
 }
 
-void loopReceiver() {
+void Reciever_loop() {
     static uint8_t channelFlags;
 
     if(timeOfLastTransmission == 0 || (micros() - timeOfLastTransmission) > FAILSAFE_DELAY){ //transmitter not connected
         failsafe = true; //transmitter not connected
 
         //make stable
-        RCroll = 0; 
-        RCpitch = 0;
+        rollIn = 0; 
+        pitchIn = 0;
 
         //set throttle
-        RCthrottle = ESC_MIN; //engine shutoff
+        throttleIn = 0; //engine shutoff, maybe set to 20-30%?
     }else{ 
       failsafe = false;
     }
@@ -119,26 +134,26 @@ void loopReceiver() {
         channelFlags = channelFlagsShared;
 
         if(channelFlags & CHANNEL1_FLAG){
-            rollIn = rollInShared;
+            rollInRaw = rollInShared;
         }
         if(channelFlags & CHANNEL2_FLAG){
-            pitchIn = pitchInShared;
+            pitchInRaw = pitchInShared;
         }
         if(channelFlags & CHANNEL3_FLAG){
-            throttleIn = throttleInShared;
+            throttleInRaw = throttleInShared;
         }
         if(channelFlags & CHANNEL4_FLAG){
-            yawIn = yawInShared;
+            yawInRaw = yawInShared;
         }
         channelFlagsShared = 0;
 
         interrupts();
     }
 
-    RCroll = map(rollIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
-    RCpitch = -map(pitchIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
-    RCthrottle = map(throttleIn, RCRECIEVER_MIN, RCRECIEVER_MAX, ESC_MIN, ESC_MAX);
-    RCyaw = -map(yawIn, RCRECIEVER_MIN, RCRECIEVER_MAX, -135, 135); 
+    rollIn = map(rollInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
+    pitchIn = -map(pitchInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
+    throttleIn = toDecimalPercent(throttleInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX);
+    yawIn = -map(yawInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX, -135, 135); 
 }
 
 #endif

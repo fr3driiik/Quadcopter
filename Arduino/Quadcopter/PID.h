@@ -5,7 +5,6 @@
 
 class PID {
   public:
-    enum Direction { DIRECT, REVERSE };
     PID(float *input, float *target, float *output, float kp, float ki, float kd, bool revert);
     void reset();
     void calculate(float deltaTime);

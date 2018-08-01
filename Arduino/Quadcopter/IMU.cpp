@@ -7,7 +7,7 @@ Orientation orientation;
 float height;
 long IMU_timer;
 
-void IMU_init() {
+void IMU_initialize() {
   IMU_timer = micros();
   orientation = {0.0f, 0.0f, 0.0f};  
 }

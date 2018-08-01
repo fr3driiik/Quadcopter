@@ -1,13 +1,5 @@
 /*Quadcopter!
  * 
- * ESC settings:
- * stop/arm   1060 Âµs = 132 analogWrite Value
- * full power 1860 Âµs = 232,407 analogWrite Value. Detta ger endast 100 steg, har mÃ¶jlighet fÃ¶r 800st
- * PWM freq for pin 3, 5, 6, 9 (timer 2, 3, 4) = 490 Hz, every Pulse = 2040.8163265306 Âµs
- * analogWrite(pin, value), 0 off, 255 on
- * 
- * RC reviever 8 ch PIN: 31, 33, 35, 37, 39, 41, 43, 45
- * 
  * Sensorsticka I2C:
  * I2C device found at address 0x1E  ! = HMC5883L magnetometer
  * I2C device found at address 0x41  ! = BMA180 accelerometer
@@ -27,6 +19,7 @@
 #include "GPS.h"
 #include "Utils.h"
 #include "Output.h"
+#include "ESCManager.h"
 
 #define I2C_SPEED 400000 //400kHz = fast mode
 #define DESIRED_HZ 200 //5ms
@@ -60,12 +53,13 @@ void setup() {
     Wire.begin();
     Wire.setClock(I2C_SPEED);
     init_sensors();
-    init_gps();
-    initialize_receiver();
+    GPS_initialize();
+    Reciever_initialize();
+    ESCManager_initialize();
+    IMU_initialize();
     setRatePidsIntegralLimits(-40, 40); //direct engine influence
     setStablePidsIntegralLimits(-202.5, 202.5); //max degrees per second to get right degree
     Serial.println("Ready for takeoff!");
-    IMU_init();
     wdt_enable(WDTO_500MS);
     timer = millis();
 }
@@ -73,8 +67,9 @@ void setup() {
 void loop() {    
     float deltaTime = (millis() - timer) / 1000.0000f;
     timer = millis();
+    Reciever_loop();
     read_sensors();
-    if (read_gps()) {
+    if (GPS_read()) {
       #if PRINT_GPS_DATA
         print_gps();
       #endif
@@ -87,42 +82,23 @@ void loop() {
       print_sensor_data();
     #endif
 
-    if(RCthrottle > 140){ //calc PIDS and run engines accordingly
+    if(throttleIn > 0.05){ //calc PIDS and run engines accordingly
 
       //calc stab pids
       computeStabPids(deltaTime);
 
       //yaw change desired? overwrite stab output
-      if(abs(RCyaw) > 5){
-        yaw_stab_output = RCyaw;
+      if(abs(yawIn) > 0.05){
+        yaw_stab_output = fromDecimalPercent(yawIn, -YAW_MAX_DPS, YAW_MAX_DPS);
         yaw_target = yawDegrees;
       }
 
       //calc stab pids
       computeRatePids(deltaTime);
 
-      //calc engine values
-      long motor_FR_output = RCthrottle - roll_output - pitch_output - yaw_output;
-      long motor_RL_output = RCthrottle + roll_output + pitch_output - yaw_output;
-      long motor_FL_output = RCthrottle + roll_output - pitch_output + yaw_output;
-      long motor_RR_output = RCthrottle - roll_output + pitch_output + yaw_output; 
-
-      motor_FR_output = constrain(motor_FR_output, ESC_MIN, ESC_MAX);
-      motor_RL_output = constrain(motor_RL_output, ESC_MIN, ESC_MAX);
-      motor_FL_output = constrain(motor_FL_output, ESC_MIN, ESC_MAX);
-      motor_RR_output = constrain(motor_RR_output, ESC_MIN, ESC_MAX);
-  
-      //send engine values
-      analogWrite(MOTOR_FR_OUT_PIN, motor_FR_output);
-      analogWrite(MOTOR_RL_OUT_PIN, motor_RL_output);
-      analogWrite(MOTOR_FL_OUT_PIN, motor_FL_output);
-      analogWrite(MOTOR_RR_OUT_PIN, motor_RR_output); 
+      ESCManager_setInput(pitch_output, roll_output, yaw_output, throttleIn); //should actually feed values in % (pyr -100 - 100, throttle 0-100)
     } else { //too low throttle
-      //send arm/stop values
-      analogWrite(MOTOR_FR_OUT_PIN, ESC_MIN);
-      analogWrite(MOTOR_RL_OUT_PIN, ESC_MIN);
-      analogWrite(MOTOR_FL_OUT_PIN, ESC_MIN);
-      analogWrite(MOTOR_RR_OUT_PIN, ESC_MIN);
+      ESCManager_tooLowThrottle();
       if (DEBUG_OUTPUT)
         Serial.print("Engines off   ");
 

@@ -2,7 +2,7 @@
 
 NAV_PVT pvt;
 
-void init_gps() {
+void GPS_initialize() {
   Serial1.begin(9600);
   Serial.println("GPS serial initialized");
   delay(5);
@@ -16,11 +16,11 @@ void calcChecksum(unsigned char* CK) {
   }
 }
 
-NAV_PVT getGPSMessage() {
+NAV_PVT GPS_getGPSMessage() {
   return pvt;
 }
 
-bool read_gps() {
+bool GPS_read() {
   static int fpos = 0;
   static unsigned char checksum[2];
   const int payloadSize = sizeof(NAV_PVT);

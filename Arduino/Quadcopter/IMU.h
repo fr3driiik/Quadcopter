@@ -16,7 +16,7 @@ struct Orientation {
 };
 
 
-void IMU_init();
+void IMU_initialize();
 void IMU_calculate();
 Orientation IMU_getOrientation();
 float IMU_getHeight();

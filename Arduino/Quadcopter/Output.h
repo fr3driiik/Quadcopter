@@ -28,7 +28,7 @@ void print_pyr() {
 }
 
 void print_gps() {
-  NAV_PVT pvt = getGPSMessage();
+  NAV_PVT pvt = GPS_getGPSMessage();
   Serial.print("ITOW: "); Serial.print(pvt.iTOW);
   Serial.print(" lat/long: "); Serial.print(pvt.lat/10000000.0f, 8); Serial.print(", "); Serial.print(pvt.lon/10000000.0f, 8);
   Serial.println();

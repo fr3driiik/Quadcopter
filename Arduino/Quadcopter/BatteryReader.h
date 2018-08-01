@@ -5,7 +5,7 @@
 
 float readBattery() {
   int raw = analogRead(BATTERY_PIN);
-  return map(raw, 0, 1023, 0, 5);
+  return map(raw, 0, 1023, 0, 5 * VOLTAGE_DIVIDER);
 }
 
 #endif

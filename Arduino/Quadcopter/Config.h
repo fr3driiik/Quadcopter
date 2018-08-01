@@ -1,12 +1,17 @@
 #ifndef CONFIG_H
 #define CONFIG_H
 
+#include "ESC.h"
 //This file contains all configuration
 
 //Select board
-#define Arduino_Pro_Micro
-//#define Arduino_Mega_2560
+//#define Arduino_Pro_Micro
+#define Arduino_Mega_2560
 //#define Teensy_3_6
+
+//Rotations
+#define ROLL_PITCH_MAX_ANGLE 45
+#define YAW_MAX_DPS 135
 
 //RECIEVER
 #define RCRECIEVER_MIN 1050
@@ -21,7 +26,7 @@
   #define CHANNEL6_INPUT_PIN A5
   #define CHANNEL7_INPUT_PIN A6
   #define CHANNEL8_INPUT_PIN A7
-#elif Arduino_Mega_2560
+#elif defined(Arduino_Mega_2560)
   #define CHANNEL1_INPUT_PIN A15 //roll
   #define CHANNEL2_INPUT_PIN A14 //pitch
   #define CHANNEL3_INPUT_PIN A13 //throttle
@@ -30,7 +35,7 @@
   #define CHANNEL6_INPUT_PIN A10
   #define CHANNEL7_INPUT_PIN A9
   #define CHANNEL8_INPUT_PIN A8
-#elif Teensy_3_6
+#elif defined(Teensy_3_6)
   #define CHANNEL1_INPUT_PIN A15 //roll
   #define CHANNEL2_INPUT_PIN A14 //pitch
   #define CHANNEL3_INPUT_PIN A13 //throttle
@@ -42,25 +47,29 @@
 #endif
 
 //ESC
-#define ESC_MIN 132
-#define ESC_MAX 232
+#define ESC_COUNT 4
 #ifdef Arduino_Pro_Micro
-  #define MOTOR_FR_OUT_PIN 3
-  #define MOTOR_RL_OUT_PIN 5
-  #define MOTOR_FL_OUT_PIN 6
-  #define MOTOR_RR_OUT_PIN 9
-#elif Arduino_Mega_2560
-  #define MOTOR_FR_OUT_PIN 3
-  #define MOTOR_RL_OUT_PIN 5
-  #define MOTOR_FL_OUT_PIN 6
-  #define MOTOR_RR_OUT_PIN 9
-#elif Teensy_3_6
-  #define MOTOR_FR_OUT_PIN 3
-  #define MOTOR_RL_OUT_PIN 5
-  #define MOTOR_FL_OUT_PIN 6
-  #define MOTOR_RR_OUT_PIN 9
+  const ESC escs[] = {
+    {3, -1.0, -1.0, -1.0}, //FR
+    {5, 1.0, 1.0, -1.0},   //RR
+    {6, 1.0, -1.0, 1.0},   //RL
+    {9, -1.0, 1.0, 1.0}    //FL
+  };
+#elif defined(Arduino_Mega_2560)
+  const ESC escs[] = {
+    {3, -1.0, -1.0, -1.0}, //FR
+    {5, 1.0, 1.0, -1.0},   //RR
+    {6, 1.0, -1.0, 1.0},   //RL
+    {9, -1.0, 1.0, 1.0}    //FL
+  };
+#elif defined(Teensy_3_6)
+  const ESC escs[] = {
+    {3, -1.0, -1.0, -1.0}, //FR
+    {5, 1.0, 1.0, -1.0},   //RR
+    {6, 1.0, -1.0, 1.0},   //RL
+    {9, -1.0, 1.0, 1.0}    //FL
+  };
 #endif
-static const int ENGINES = {}; //hmm bad type?
 
 //Battery
 #define BATTERY_PIN 3

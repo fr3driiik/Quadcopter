@@ -19,8 +19,8 @@ float gyroDegrees[3];
 
 float yaw_target = 0;
 
-PID pidPitchStable(&pitchDegrees, &pitch_stab_output, &RCpitch, 4.5, 0.0, 0.0, false);
-PID pidRollStable(&rollDegrees, &roll_stab_output, &RCroll, 4.5, 0.0, 0.0, false);
+PID pidPitchStable(&pitchDegrees, &pitch_stab_output, &pitchIn, 4.5, 0.0, 0.0, false); //TODO!!! This is wrong. pitchIn is in %, we need do convert to AngleDegrees
+PID pidRollStable(&rollDegrees, &roll_stab_output, &rollIn, 4.5, 0.0, 0.0, false);
 PID pidYawStable(&yawDegrees, &yaw_stab_output, &yaw_target, 6, 0.0, 0.0, true); //yaw_target is wrapped 180deg before this is computed
 
 PID pidPitchRate(&gyroDegrees[1], &pitch_output, &pitch_stab_output, 0.05, 0.1, 0.0, true);
