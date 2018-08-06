@@ -4,8 +4,12 @@
 #include "Utils.h"
 
 float readBattery() {
-  int raw = analogRead(BATTERY_PIN);
-  return map(raw, 0, 1023, 0, 5 * VOLTAGE_DIVIDER);
+  #if BOARD_VOLTAGE * VOLTAGE_DIVIDER >= VOLTAGE_MAX
+    int raw = analogRead(BATTERY_PIN);
+    return map(raw, 0, 1023, 0, BOARD_VOLTAGE * VOLTAGE_DIVIDER);
+  #else
+    return -1.0; //should be avoided..
+  #endif
 }
 
 #endif

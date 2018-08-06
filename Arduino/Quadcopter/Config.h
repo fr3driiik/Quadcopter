@@ -9,6 +9,10 @@
 #define Arduino_Mega_2560
 //#define Teensy_3_6
 
+//Sensors
+//#define MAGNETOMETER
+//#define GPS
+
 //Rotations
 #define ROLL_PITCH_MAX_ANGLE 45
 #define YAW_MAX_DPS 135
@@ -72,7 +76,17 @@
 #endif
 
 //Battery
+#define VOLTAGE_MAX (4 * 4.2) //4cell LiPo
+#define VOLTAGE_LOW (4 * 3.5)
+//#define VOLTAGE_KILL (4 * 3.2)
 #define BATTERY_PIN 3
 #define VOLTAGE_DIVIDER 5
+#ifdef Arduino_Pro_Micro
+  #define BOARD_VOLTAGE 5.0
+#elif defined(Arduino_Mega_2560)
+  #define BOARD_VOLTAGE 5.0
+#elif defined(Teensy_3_6)
+  #define BOARD_VOLTAGE 3.3
+#endif
 
 #endif

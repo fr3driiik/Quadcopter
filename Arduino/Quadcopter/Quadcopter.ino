@@ -56,7 +56,6 @@ void setup() {
     GPS_initialize();
     Reciever_initialize();
     ESCManager_initialize();
-    IMU_initialize();
     setRatePidsIntegralLimits(-40, 40); //direct engine influence
     setStablePidsIntegralLimits(-202.5, 202.5); //max degrees per second to get right degree
     Serial.println("Ready for takeoff!");
@@ -74,7 +73,7 @@ void loop() {
         print_gps();
       #endif
     }
-    IMU_calculate();
+    IMU_update(deltaTime);
     #if PRINT_PYR_DATA
       print_pyr();
     #endif

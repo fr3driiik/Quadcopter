@@ -5,7 +5,20 @@
 #include "Utils.h"
 #include <math.h>
 
-//#define MAGNETOMETER
+#define USE_SIMPLE_BIAS_FILTER
+
+struct State {
+  float qx, qy, qz, qw; //quaternion
+  float pitch, yaw, roll, pitchDegrees, yawDegrees, rollDegrees;
+  float rotationMatrix[3][3];
+  float accNorth, accEast, accDown;
+  float longitude, latitude;
+  float height;
+}
+
+State IMU_getState();
+void IMU_update(float dt);
+void IMU_updateGPS(float dt); //only if gps is enabled
 
 struct Orientation {
   float pitch;
@@ -14,12 +27,6 @@ struct Orientation {
   float pitchRadians;
   float rollRadians;
 };
-
-
-void IMU_initialize();
-void IMU_calculate();
-Orientation IMU_getOrientation();
-float IMU_getHeight();
 
 #endif
 

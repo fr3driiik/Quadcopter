@@ -1,28 +1,15 @@
 #include "IMU.h"
 
 #define LP_FACTOR 0.02f
-#define HP_FACTOR (float) (1.00f - LP_FACTOR)
+#define HP_FACTOR (1.00f - LP_FACTOR)
 
-Orientation orientation;
-float height;
-long IMU_timer;
+State state;
 
-void IMU_initialize() {
-  IMU_timer = micros();
-  orientation = {0.0f, 0.0f, 0.0f};  
-}
-
-Orientation IMU_getOrientation() {
+State IMU_getState() {
   return orientation;
 }
 
-float IMU_getHeight() {
-  return height;
-}
-
-void IMU_calculate() {
-  float dt = ((float)(micros() - IMU_timer)) / 1000000.0000f;
-  IMU_timer = micros();
+void IMU_update(float dt) {
   orientation = {gyro[PITCH] * dt + orientation.pitch, 
                  gyro[YAW] * dt + orientation.yaw, 
                  gyro[ROLL] * dt + orientation.roll};
@@ -57,3 +44,8 @@ void IMU_calculate() {
   else if (orientation.yaw < -180.0f)
     orientation.yaw += 360.0f;
 }
+
+void IMU_updateGPS(float dt) {
+  
+}
+
