@@ -22,9 +22,19 @@ void print_sensor_data(){
 }
 
 void print_pyr() {
-  Orientation o = IMU_getOrientation();
-  Serial.print("p:");Serial.print(o.pitch);Serial.print("y:");Serial.print(o.yaw);Serial.print("r:");Serial.print(o.roll);
+  State s = IMU_getState();
+  Serial.print("p:");Serial.print(s.pitch);Serial.print("y:");Serial.print(s.yaw);Serial.print("r:");Serial.print(s.roll);
   Serial.println();
+}
+
+void print_state() {
+  State s = IMU_getState();
+  String stringStart = "";
+  //we dont print quaternion or rotationMatrix, they are not understandable..
+  Serial.println(stringStart + "Pitch: " + s.pitchDegrees + " Yaw: " + s.yawDegrees + " Roll: " + s.rollDegrees);
+  Serial.println(stringStart + "AccNorth: " + s.accNorth + " AccEast: " + s.accEast + " AccDown: " + s.accDown);
+  Serial.println(stringStart + "Longitude: " + s.longitude + " Latitude: " + s.latitude);
+  Serial.println(stringStart + "Height: " + s.height);
 }
 
 void print_gps() {

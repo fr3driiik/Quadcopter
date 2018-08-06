@@ -3,6 +3,7 @@
 #include "Arduino.h"
 #include "Sensors.h"
 #include "Utils.h"
+#include "Config.h"
 #include <math.h>
 
 #define USE_SIMPLE_BIAS_FILTER
@@ -14,19 +15,11 @@ struct State {
   float accNorth, accEast, accDown;
   float longitude, latitude;
   float height;
-}
+};
 
 State IMU_getState();
 void IMU_update(float dt);
 void IMU_updateGPS(float dt); //only if gps is enabled
-
-struct Orientation {
-  float pitch;
-  float yaw;
-  float roll;
-  float pitchRadians;
-  float rollRadians;
-};
 
 #endif
 
