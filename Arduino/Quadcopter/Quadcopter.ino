@@ -28,7 +28,8 @@
 #define OUTPUT__BAUD_RATE 115200
 #define DEBUG_OUTPUT false
 #define PRINT_SENSOR_DATA false
-#define PRINT_PYR_DATA true
+#define PRINT_PYR_DATA false
+#define PRINT_STATE true
 #define PRINT_GPS_DATA false
 #define PRINT_LOOP_TIME_OVER false
 
@@ -76,6 +77,9 @@ void loop() {
     IMU_update(deltaTime);
     #if PRINT_PYR_DATA
       print_pyr();
+    #endif
+    #if PRINT_STATE
+      print_state();
     #endif
     #if PRINT_SENSOR_DATA
       print_sensor_data();

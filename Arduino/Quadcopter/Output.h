@@ -33,6 +33,7 @@ void print_state() {
   //we dont print quaternion or rotationMatrix, they are not understandable..
   Serial.println(stringStart + "Pitch: " + s.pitchDegrees + " Yaw: " + s.yawDegrees + " Roll: " + s.rollDegrees);
   Serial.println(stringStart + "AccNorth: " + s.accNorth + " AccEast: " + s.accEast + " AccDown: " + s.accDown);
+  Serial.println(stringStart + "VeloNorth: " + s.veloNorth + " VeloEast: " + s.veloEast + " VeloDown: " + s.veloDown);
   Serial.println(stringStart + "Longitude: " + s.longitude + " Latitude: " + s.latitude);
   Serial.println(stringStart + "Height: " + s.height);
 }

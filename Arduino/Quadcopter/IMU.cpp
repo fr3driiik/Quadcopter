@@ -39,8 +39,13 @@ void IMU_update(float dt) {
         
       }
     #endif
-  #endif // USE_SIMPLE_BIAS_FILTER
 
+    //update quaternion
+  #else // USE_SIMPLE_BIAS_FILTER
+
+
+  #endif // use madgewick kalman
+  
   //wrap yaw between -180 and 180
   if (state.yawDegrees > 180.0f) 
     state.yawDegrees -= 360.0f;
@@ -48,6 +53,16 @@ void IMU_update(float dt) {
     state.yawDegrees += 360.0f;
 
   state.yaw = state.yawDegrees * DEGREES_TO_RADIANS;
+
+  Utils_QuaternionToRotationMatrix(state.qx, state.qy, state.qz, state.qw, state.rotationMatrix);
+  Utils_Rotate(state.rotationMatrix, accel[PITCH], accel[ROLL], accel[YAW], &(state.accNorth), &(state.accEast), &(state.accDown));
+
+  //update velo
+  state.veloNorth += state.accNorth * dt;
+  state.veloEast += state.accEast * dt;
+  state.veloDown += state.accDown * dt;
+
+  state.height += state.veloDown * dt;
 }
 
 void IMU_updateGPS(float dt) {

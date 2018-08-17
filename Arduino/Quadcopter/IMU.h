@@ -13,6 +13,7 @@ struct State {
   float pitch, yaw, roll, pitchDegrees, yawDegrees, rollDegrees;
   float rotationMatrix[3][3];
   float accNorth, accEast, accDown;
+  float veloNorth, veloEast, veloDown;
   float longitude, latitude;
   float height;
 };
