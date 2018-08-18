@@ -19,8 +19,9 @@
 #define GYRO_Y_OFFSET -96
 #define GYRO_Z_OFFSET 8
 
+#define ACC_GAIN 0.000244140625
 #define ACC_X_OFFSET 0
-#define ACC_Y_OFFSET 0
+#define ACC_Y_OFFSET 90
 #define ACC_Z_OFFSET 0
 
 #define MAG_X_OFFSET -153
@@ -106,7 +107,7 @@ void Read_Accel()
   
   Wire.beginTransmission(ACCEL_ADDRESS);
   Wire.requestFrom(ACCEL_ADDRESS, 6);  // Request 6 bytes
-  while(Wire.available())  // ((Wire.available())&&(i<6))
+  while(Wire.available())
   { 
     buff[i] = WIRE_RECEIVE();  // Read one byte
     i++;
@@ -115,9 +116,9 @@ void Read_Accel()
   
   if (i == 6)  // All bytes received?
   {
-    accel[0] = (int16_t)(( buff[2] | buff[3]<<8)>>6);  // X axis (internal sensor y axis)
-    accel[1] = (int16_t)(( buff[0] | buff[1]<<8)>>6);  // Y axis (internal sensor x axis)
-    accel[2] = (int16_t)(( buff[4] | buff[5]<<8)>>6);  // Z axis (internal sensor z axis)
+    accel[0] = (float) (ACC_GAIN * ((( buff[2] | buff[3]<<8)>>2) + ACC_X_OFFSET));  // X axis (internal sensor y axis)
+    accel[1] = (float) (ACC_GAIN * ((( buff[0] | buff[1]<<8)>>2) + ACC_Y_OFFSET));  // Y axis (internal sensor x axis)
+    accel[2] = (float) (ACC_GAIN * ((( buff[4] | buff[5]<<8)>>2) + ACC_Z_OFFSET));  // Z axis (internal sensor z axis)
   }
   else
   {

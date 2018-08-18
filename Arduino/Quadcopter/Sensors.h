@@ -13,8 +13,8 @@
 
 // Sensor variables [x, y, z]
 extern float gyro[3];
-extern float accel[3];
-extern float magnetom[3];
+extern float accel[3]; 
+extern float magnetom[3]; 
 
 void Accel_Init();
 void Read_Accel();

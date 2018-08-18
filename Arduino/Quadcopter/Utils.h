@@ -12,6 +12,20 @@ float inline fromDecimalPercent(float x, float min, float max) {
   return min + (max - min) * x;
 }
 
+void inline Utils_EulerToQuaternion(float pitch, float yaw, float roll, float *qx, float *qy, float *qz, float *qw) {
+  float cy = cos(yaw * 0.5);
+  float sy = sin(yaw * 0.5);
+  float cr = cos(roll * 0.5);
+  float sr = sin(roll * 0.5);
+  float cp = cos(pitch * 0.5);
+  float sp = sin(pitch * 0.5);
+
+  *qx = cy * sr * cp - sy * cr * sp;
+  *qy = cy * cr * sp + sy * sr * cp;
+  *qz = sy * cr * cp - cy * sr * sp;
+  *qw = cy * cr * cp + sy * sr * sp;
+}
+
 // Quaternion should be normalized before this call
 void inline Utils_QuaternionToRotationMatrix(float qx, float qy, float qz, float qw, float matrix[3][3]) {
   float sqx = qx * qx;

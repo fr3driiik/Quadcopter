@@ -34,6 +34,8 @@
 #define PRINT_LOOP_TIME_OVER false
 
 unsigned long timer;
+unsigned long timer1HZ;
+unsigned long timer10HZ;
 
 void init_sensors() {
   Gyro_Init();
@@ -69,7 +71,20 @@ void loop() {
     timer = millis();
     Reciever_loop();
     read_sensors();
-    if (GPS_read()) {
+
+    float dt1HZ = (micros() - timer1HZ) / 1000000.0000f;
+    if (dt1HZ >= 1.0f) {
+      timer1HZ = micros();
+      do1HZ(dt1HZ);
+    }
+
+    float dt10HZ = (micros() - timer10HZ) / 1000000.0000f;
+    if (dt10HZ >= 0.1f) {
+      timer10HZ = micros();
+      do10HZ(dt10HZ);
+    }
+    
+    if (GPS_read()) { //maybe move to 10hz?
       #if PRINT_GPS_DATA
         print_gps();
       #endif
@@ -78,10 +93,7 @@ void loop() {
     #if PRINT_PYR_DATA
       print_pyr();
     #endif
-    #if PRINT_STATE
-      print_state();
-    #endif
-    #if PRINT_SENSOR_DATA
+    #if PRINT_SENSOR_DATA     
       print_sensor_data();
     #endif
 
@@ -126,8 +138,18 @@ void loop() {
       }
     }
     if (loopTimeExceded) {
-      Serial.println("#:LOOP");
+      Serial.println("#:TimeExceed");
     }
 
     wdt_reset(); //we are still alive  
 } // loop()
+
+inline void do1HZ(float dt) {
+  #if PRINT_STATE
+    print_state();
+  #endif
+}
+
+inline void do10HZ(float dt) {
+  
+}

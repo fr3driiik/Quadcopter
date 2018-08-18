@@ -19,8 +19,8 @@ void IMU_update(float dt) {
     if (abs(accel[ROLL]) > 0.0f && abs(accel[PITCH]) > 0.0f) {
       float accPitch = -atan2(accel[ROLL], accel[YAW]) * RAD_TO_DEG;
       float accRoll = atan2(accel[PITCH], accel[YAW]) * RAD_TO_DEG;
-      state.pitchDegrees = HP_FACTOR * state.pitch + LP_FACTOR * accPitch;
-      state.rollDegrees = HP_FACTOR * state.roll + LP_FACTOR * accRoll;
+      state.pitchDegrees = HP_FACTOR * state.pitchDegrees + LP_FACTOR * accPitch;
+      state.rollDegrees = HP_FACTOR * state.rollDegrees + LP_FACTOR * accRoll;
     }
     state.pitch = state.pitchDegrees * DEGREES_TO_RADIANS;
     state.roll = state.rollDegrees * DEGREES_TO_RADIANS;
@@ -28,7 +28,7 @@ void IMU_update(float dt) {
     #ifdef MAGNETOMETER
       //compensate yaw drift with magnetometer 
       //https://github.com/jarzebski/Arduino-HMC5883L/blob/master/HMC5883L_compensation_MPU6050/HMC5883L_compensation_MPU6050.ino
-      if (!(state.roll > 45 || state.roll < -45 || state.pitch > 45 || state.pitch < -45)) { //hm is this not in radians?
+      if (!(state.rollDegrees > 45 || state.rollDegrees < -45 || state.pitchDegrees > 45 || state.pitchDegrees < -45)) { //hm is this not in radians?
         float cosRoll = cos(state.roll);
         float sinRoll = sin(state.roll);
         float cosPitch = cos(state.pitch);
@@ -41,6 +41,7 @@ void IMU_update(float dt) {
     #endif
 
     //update quaternion
+    Utils_EulerToQuaternion(state.pitch, state.yaw, state.roll, &(state.qx), &(state.qy), &(state.qz), &(state.qw));
   #else // USE_SIMPLE_BIAS_FILTER
 
 
@@ -57,12 +58,14 @@ void IMU_update(float dt) {
   Utils_QuaternionToRotationMatrix(state.qx, state.qy, state.qz, state.qw, state.rotationMatrix);
   Utils_Rotate(state.rotationMatrix, accel[PITCH], accel[ROLL], accel[YAW], &(state.accNorth), &(state.accEast), &(state.accDown));
 
+  state.accDown -= 1.00; //remove gravity
+
   //update velo
   state.veloNorth += state.accNorth * dt;
   state.veloEast += state.accEast * dt;
   state.veloDown += state.accDown * dt;
 
-  state.height += state.veloDown * dt;
+  state.height -= state.veloDown * dt;
 }
 
 void IMU_updateGPS(float dt) {
