@@ -56,7 +56,8 @@ void IMU_update(float dt) {
   state.yaw = state.yawDegrees * DEGREES_TO_RADIANS;
 
   Utils_QuaternionToRotationMatrix(state.qx, state.qy, state.qz, state.qw, state.rotationMatrix);
-  Utils_Rotate(state.rotationMatrix, accel[PITCH], accel[ROLL], accel[YAW], &(state.accNorth), &(state.accEast), &(state.accDown));
+  Utils_Matrix3x3Inverse(state.rotationMatrix, state.rotationMatrixInv);
+  Utils_Rotate(state.rotationMatrixInv, accel[PITCH], accel[ROLL], accel[YAW], &(state.accNorth), &(state.accEast), &(state.accDown));
 
   state.accDown -= 1.00; //remove gravity
 

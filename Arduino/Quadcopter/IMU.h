@@ -11,7 +11,7 @@
 struct State {
   float qx, qy, qz, qw; //quaternion
   float pitch, yaw, roll, pitchDegrees, yawDegrees, rollDegrees;
-  float rotationMatrix[3][3];
+  float rotationMatrix[3][3], rotationMatrixInv[3][3];
   float accNorth, accEast, accDown;
   float veloNorth, veloEast, veloDown;
   float longitude, latitude;

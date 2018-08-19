@@ -54,7 +54,32 @@ void inline Utils_QuaternionToRotationMatrix(float qx, float qy, float qz, float
 }
 
 void inline Utils_Matrix3x3Inverse(float matrix[3][3], float output[3][3]) {
-  
+  float m10x21 = matrix[1][0] * matrix[2][1];
+  float m10x22 = matrix[1][0] * matrix[2][2];
+  float m11x20 = matrix[1][1] * matrix[2][0];
+  float m11x22 = matrix[1][1] * matrix[2][2];
+  float m12x20 = matrix[1][2] * matrix[2][0];
+  float m12x21 = matrix[1][2] * matrix[2][1];
+
+  float det = matrix[0][0] * (m11x22 - m12x21)
+            - matrix[0][1] * (m10x22 - m12x20)
+            + matrix[0][2] * (m10x21 - m11x20);
+
+  if (det == 0) {
+    Serial.println("Matrix det division by 0 avoided.");
+    return;
+  }
+  float invdet = 1 / det;
+
+  output[0][0] = (m11x22 - m12x21) * invdet;
+  output[0][1] = (matrix[0][2] * matrix[2][1] - matrix[0][1] * matrix[2][2]) * invdet;
+  output[0][2] = (matrix[0][1] * matrix[1][2] - matrix[0][2] * matrix[1][1]) * invdet;
+  output[1][0] = (m12x20 - m10x22) * invdet;
+  output[1][1] = (matrix[0][0] * matrix[2][2] - matrix[0][2] * matrix[2][0]) * invdet;
+  output[1][2] = (matrix[1][0] * matrix[0][2] - matrix[0][0] * matrix[1][2]) * invdet;
+  output[2][0] = (m10x21 - m11x20) * invdet;
+  output[2][1] = (matrix[2][0] * matrix[0][1] - matrix[0][0] * matrix[2][1]) * invdet;
+  output[2][2] = (matrix[0][0] * matrix[1][1] - matrix[0][1] * matrix[1][0]) * invdet;
 }
 
 void inline Utils_Rotate(float matrix[3][3], float xIn, float yIn, float zIn, float *xOut, float *yOut, float *zOut) {
