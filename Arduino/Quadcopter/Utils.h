@@ -53,6 +53,10 @@ void inline Utils_QuaternionToRotationMatrix(float qx, float qy, float qz, float
   matrix[2][1] = 2.0 * (tmp1 - tmp2);
 }
 
+void inline Utils_Matrix3x3Inverse(float matrix[3][3], float output[3][3]) {
+  
+}
+
 void inline Utils_Rotate(float matrix[3][3], float xIn, float yIn, float zIn, float *xOut, float *yOut, float *zOut) {
   *xOut = matrix[0][0] * xIn + matrix[1][0] * yIn + matrix[2][0] * zIn;
   *yOut = matrix[0][1] * xIn + matrix[1][1] * yIn + matrix[2][1] * zIn;
