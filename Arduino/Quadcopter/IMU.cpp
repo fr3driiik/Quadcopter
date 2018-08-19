@@ -2,6 +2,18 @@
 
 #define LP_FACTOR 0.02f
 #define HP_FACTOR (1.00f - LP_FACTOR)
+/*
+#define sampleFreq  512.0f    // sample frequency in Hz
+#define betaDef   0.1f    // 2 * proportional gain
+
+//---------------------------------------------------------------------------------------------------
+// Variable definitions
+
+volatile float beta = betaDef;                // 2 * proportional gain (Kp)
+volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;  // quaternion of sensor frame relative to auxiliary frame
+
+FIX THIS 
+*/
 
 State state;
 
@@ -39,11 +51,15 @@ void IMU_update(float dt) {
         
       }
     #endif
-
     //update quaternion
     Utils_EulerToQuaternion(state.pitch, state.yaw, state.roll, &(state.qx), &(state.qy), &(state.qz), &(state.qw));
   #else // USE_SIMPLE_BIAS_FILTER
-
+    #ifdef MAGNETOMETER
+      //TODO use state.quaternions ..
+      MadgwickAHRS_Update(gyro[PITCH], gyro[YAW], gyro[ROLL], accel[PITCH], accel[YAW], accel[ROLL], magnetom[PITCH], magnetom[YAW], magnetom[ROLL]);
+    #else
+      MadgwickAHRS_Update(gyro[PITCH], gyro[YAW], gyro[ROLL], accel[PITCH], accel[YAW], accel[ROLL]);
+    #endif
 
   #endif // use madgewick kalman
   
