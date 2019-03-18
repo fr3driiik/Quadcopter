@@ -38,11 +38,12 @@
   #define ESC_MIN 2170
   #define ESC_MAX 3809
 #endif
-
-void ESCManager_initialize();
-void ESCManager_setInput(float pitch, float roll, float yaw, float throttle);
-void ESCManager_armAll();
-void ESCManager_disarmAll();
-void ESCManager_tooLowThrottle();
+namespace ESCManager {
+  void initialize();
+  void setInput(float pitch, float roll, float yaw, float throttle);
+  void armAll();
+  void disarmAll();
+  void tooLowThrottle();
+}
 
 #endif

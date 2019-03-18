@@ -39,7 +39,7 @@ void print_state() {
 }
 
 void print_gps() {
-  NAV_PVT pvt = GPS_getGPSMessage();
+  GPS::NAV_PVT pvt = GPS::getGPSMessage();
   Serial.print("ITOW: "); Serial.print(pvt.iTOW);
   Serial.print(" lat/long: "); Serial.print(pvt.lat/10000000.0f, 8); Serial.print(", "); Serial.print(pvt.lon/10000000.0f, 8);
   Serial.println();

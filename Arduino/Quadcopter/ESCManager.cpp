@@ -1,6 +1,6 @@
 #include "ESCManager.h"
 
-void ESCManager_initialize() {
+void ESCManager::initialize() {
   #ifdef Teensy_3_6
     analogWriteResolution(12);
   #endif
@@ -12,7 +12,7 @@ void ESCManager_initialize() {
   }
 }
 
-void ESCManager_setInput(float pitch, float roll, float yaw, float throttle) {
+void ESCManager::setInput(float pitch, float roll, float yaw, float throttle) {
   for (int i = 0; i < ESC_COUNT; i++){
     ESC esc = escs[i];
     float speed = throttle + pitch * esc.pitchInfluence + yaw * esc.yawInfluence + roll * esc.rollInfluence;
@@ -21,19 +21,19 @@ void ESCManager_setInput(float pitch, float roll, float yaw, float throttle) {
   }
 }
    
-void ESCManager_armAll() {
+void ESCManager::armAll() {
   for (int i = 0; i < ESC_COUNT; i++) {
     analogWrite(escs[i].escPin, ESC_MIN);
   }
 }
 
-void ESCManager_disarmAll() {
+void ESCManager::disarmAll() {
   for (int i = 0; i < ESC_COUNT; i++) {
     analogWrite(escs[i].escPin, 0); // This will not send any signal. SimonK ESC will disarm after 2sec.
   }
 }
 
-void ESCManager_tooLowThrottle() {
+void ESCManager::tooLowThrottle() {
   for (int i = 0; i < ESC_COUNT; i++) {
     analogWrite(escs[i].escPin, ESC_MIN);
   }

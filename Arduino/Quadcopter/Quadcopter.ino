@@ -56,9 +56,9 @@ void setup() {
     Wire.begin();
     Wire.setClock(I2C_SPEED);
     init_sensors();
-    GPS_initialize();
-    Reciever_initialize();
-    ESCManager_initialize();
+    GPS::initialize();
+    Receiver::initialize();
+    ESCManager::initialize();
     setRatePidsIntegralLimits(-40, 40); //direct engine influence
     setStablePidsIntegralLimits(-202.5, 202.5); //max degrees per second to get right degree
     Serial.println("Ready for takeoff!");
@@ -69,7 +69,7 @@ void setup() {
 void loop() {    
     float deltaTime = (millis() - timer) / 1000.0000f;
     timer = millis();
-    Reciever_loop();
+    Receiver::loop();
     read_sensors();
 
     float dt1HZ = (micros() - timer1HZ) / 1000000.0000f;
@@ -84,7 +84,7 @@ void loop() {
       do10HZ(dt10HZ);
     }
     
-    if (GPS_read()) { //maybe move to 10hz?
+    if (GPS::read()) { //maybe move to 10hz?
       #if PRINT_GPS_DATA
         print_gps();
       #endif
@@ -97,23 +97,23 @@ void loop() {
       print_sensor_data();
     #endif
 
-    if(throttleIn > 0.05){ //calc PIDS and run engines accordingly
+    if(Receiver::throttleIn > 0.05){ //calc PIDS and run engines accordingly
 
       //calc stab pids
       computeStabPids(deltaTime);
 
       //yaw change desired? overwrite stab output
-      if(abs(yawIn) > 0.05){
-        yaw_stab_output = fromDecimalPercent(yawIn, -YAW_MAX_DPS, YAW_MAX_DPS);
+      if(abs(Receiver::yawIn) > 0.05){
+        yaw_stab_output = fromDecimalPercent(Receiver::yawIn, -YAW_MAX_DPS, YAW_MAX_DPS);
         yaw_target = yawDegrees;
       }
 
       //calc stab pids
       computeRatePids(deltaTime);
 
-      ESCManager_setInput(pitch_output, roll_output, yaw_output, throttleIn); //should actually feed values in % (pyr -100 - 100, throttle 0-100)
+      ESCManager::setInput(pitch_output, roll_output, yaw_output, Receiver::throttleIn); //should actually feed values in % (pyr -100 - 100, throttle 0-100)
     } else { //too low throttle
-      ESCManager_tooLowThrottle();
+      ESCManager::tooLowThrottle();
       if (DEBUG_OUTPUT)
         Serial.print("Engines off   ");
 
