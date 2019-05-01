@@ -15,13 +15,13 @@ volatile float q0 = 1.0f, q1 = 0.0f, q2 = 0.0f, q3 = 0.0f;  // quaternion of sen
 FIX THIS 
 */
 
-State state;
+IMU::State state;
 
-State IMU_getState() {
+IMU::State IMU::getState() {
   return state;
 }
 
-void IMU_update(float dt) {
+void IMU::update(float dt) {
   #ifdef USE_SIMPLE_BIAS_FILTER
     state.pitchDegrees += gyro[PITCH] * dt;
     state.yawDegrees += gyro[YAW] * dt;
@@ -85,7 +85,7 @@ void IMU_update(float dt) {
   state.height -= state.veloDown * dt;
 }
 
-void IMU_updateGPS(float dt) {
+void IMU::updateGPS(float dt) {
   #ifdef GPS
 
   #endif

@@ -8,19 +8,20 @@
 
 #define USE_SIMPLE_BIAS_FILTER
 
-struct State {
-  float qx, qy, qz, qw; //quaternion
-  float pitch, yaw, roll, pitchDegrees, yawDegrees, rollDegrees;
-  float rotationMatrix[3][3], rotationMatrixInv[3][3];
-  float accNorth, accEast, accDown;
-  float veloNorth, veloEast, veloDown;
-  float longitude, latitude;
-  float height;
-};
-
-State IMU_getState();
-void IMU_update(float dt);
-void IMU_updateGPS(float dt); //only if gps is enabled
-
+namespace IMU {
+  struct State {
+    float qx, qy, qz, qw; //quaternion
+    float pitch, yaw, roll, pitchDegrees, yawDegrees, rollDegrees;
+    float rotationMatrix[3][3], rotationMatrixInv[3][3];
+    float accNorth, accEast, accDown;
+    float veloNorth, veloEast, veloDown;
+    float longitude, latitude;
+    float height;
+  };
+  
+  State getState();
+  void update(float dt);
+  void updateGPS(float dt); //only if gps is enabled
+}
 #endif
 

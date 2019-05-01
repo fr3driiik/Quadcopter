@@ -89,7 +89,7 @@ void loop() {
         print_gps();
       #endif
     }
-    IMU_update(deltaTime);
+    IMU::update(deltaTime);
     #if PRINT_PYR_DATA
       print_pyr();
     #endif

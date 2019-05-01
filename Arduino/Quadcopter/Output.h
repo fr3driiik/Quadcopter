@@ -22,13 +22,13 @@ void print_sensor_data(){
 }
 
 void print_pyr() {
-  State s = IMU_getState();
+  IMU::State s = IMU::getState();
   Serial.print("p:");Serial.print(s.pitch);Serial.print("y:");Serial.print(s.yaw);Serial.print("r:");Serial.print(s.roll);
   Serial.println();
 }
 
 void print_state() {
-  State s = IMU_getState();
+  IMU::State s = IMU::getState();
   String stringStart = "";
   //we dont print quaternion or rotationMatrix, they are not understandable..
   Serial.println(stringStart + "Pitch: " + s.pitchDegrees + " Yaw: " + s.yawDegrees + " Roll: " + s.rollDegrees);
