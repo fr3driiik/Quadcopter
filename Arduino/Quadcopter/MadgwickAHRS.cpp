@@ -41,7 +41,7 @@ float invSqrt(float x);
 //---------------------------------------------------------------------------------------------------
 // AHRS algorithm update
 
-void MadgwickAHRS_Update(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz) {
+void MadgwickAHRS::Update(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz) {
   float recipNorm;
   float s0, s1, s2, s3;
   float qDot1, qDot2, qDot3, qDot4;
@@ -50,7 +50,7 @@ void MadgwickAHRS_Update(float gx, float gy, float gz, float ax, float ay, float
 
   // Use IMU algorithm if magnetometer measurement invalid (avoids NaN in magnetometer normalisation)
   if((mx == 0.0f) && (my == 0.0f) && (mz == 0.0f)) {
-    MadgwickAHRS_Update(gx, gy, gz, ax, ay, az);
+    MadgwickAHRS::Update(gx, gy, gz, ax, ay, az);
     return;
   }
 
@@ -140,7 +140,7 @@ void MadgwickAHRS_Update(float gx, float gy, float gz, float ax, float ay, float
 //---------------------------------------------------------------------------------------------------
 // IMU algorithm update
 
-void MadgwickAHRS_Update(float gx, float gy, float gz, float ax, float ay, float az) {
+void MadgwickAHRS::Update(float gx, float gy, float gz, float ax, float ay, float az) {
   float recipNorm;
   float s0, s1, s2, s3;
   float qDot1, qDot2, qDot3, qDot4;

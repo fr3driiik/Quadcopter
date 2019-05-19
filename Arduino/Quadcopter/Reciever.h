@@ -94,7 +94,6 @@ namespace Receiver {
       }
   }
   
-  //INITIALIZE
   void initialize() {
     #ifdef Teensy_3_6
       attachInterrupt(CHANNEL1_INPUT_PIN, calcChannel1, CHANGE);
@@ -117,7 +116,7 @@ namespace Receiver {
       static uint8_t channelFlags;
   
       if(timeOfLastTransmission == 0 || (micros() - timeOfLastTransmission) > FAILSAFE_DELAY){ //transmitter not connected
-          failsafe = true; //transmitter not connected
+          failsafe = true;
   
           //make stable
           rollIn = 0; 

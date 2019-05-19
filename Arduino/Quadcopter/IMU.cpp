@@ -48,17 +48,24 @@ void IMU::update(float dt) {
         float xh = magnetom[ROLL] * cosPitch + magnetom[YAW] * sinPitch;
         float yh = magnetom[ROLL] * sinRoll * sinPitch + magnetom[PITCH] * cosRoll - magnetom[YAW] * sinRoll * cosPitch;
         state.yawDegrees = state.yaw * RADIANS_TO_DEGREES;
-        
       }
     #endif
     //update quaternion
-    Utils_EulerToQuaternion(state.pitch, state.yaw, state.roll, &(state.qx), &(state.qy), &(state.qz), &(state.qw));
+    Utils::eulerToQuaternion(state.pitch, state.yaw, state.roll, &(state.qx), &(state.qy), &(state.qz), &(state.qw));
   #else // USE_SIMPLE_BIAS_FILTER
     #ifdef MAGNETOMETER
       //TODO use state.quaternions ..
       MadgwickAHRS_Update(gyro[PITCH], gyro[YAW], gyro[ROLL], accel[PITCH], accel[YAW], accel[ROLL], magnetom[PITCH], magnetom[YAW], magnetom[ROLL]);
+      state.qx = q0; //  change to MadgwickAHRS::q0
+      state.qy = q1;
+      state.qz = q2;
+      state.qw = q3;
     #else
       MadgwickAHRS_Update(gyro[PITCH], gyro[YAW], gyro[ROLL], accel[PITCH], accel[YAW], accel[ROLL]);
+      state.qx = q0;
+      state.qy = q1;
+      state.qz = q2;
+      state.qw = q3;
     #endif
 
   #endif // use madgewick kalman
@@ -71,9 +78,9 @@ void IMU::update(float dt) {
 
   state.yaw = state.yawDegrees * DEGREES_TO_RADIANS;
 
-  Utils_QuaternionToRotationMatrix(state.qx, state.qy, state.qz, state.qw, state.rotationMatrix);
-  Utils_Matrix3x3Inverse(state.rotationMatrix, state.rotationMatrixInv);
-  Utils_Rotate(state.rotationMatrixInv, accel[PITCH], accel[ROLL], accel[YAW], &(state.accNorth), &(state.accEast), &(state.accDown));
+  Utils::qQuaternionToRotationMatrix(state.qx, state.qy, state.qz, state.qw, state.rotationMatrix);
+  Utils::matrix3x3Inverse(state.rotationMatrix, state.rotationMatrixInv);
+  Utils::rotate(state.rotationMatrixInv, accel[PITCH], accel[ROLL], accel[YAW], &(state.accNorth), &(state.accEast), &(state.accDown));
 
   state.accDown -= 1.00; //remove gravity
 

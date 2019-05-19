@@ -13,18 +13,18 @@
 #ifndef MadgwickAHRS_h
 #define MadgwickAHRS_h
 
-//----------------------------------------------------------------------------------------------------
-// Variable declaration
+namespace MadgwickAHRS {
+    //----------------------------------------------------------------------------------------------------
+    // Variable declaration
+    extern volatile float beta;       // algorithm gain
+    extern volatile float q0, q1, q2, q3; // quaternion of sensor frame relative to auxiliary frame
 
-extern volatile float beta;       // algorithm gain
-extern volatile float q0, q1, q2, q3; // quaternion of sensor frame relative to auxiliary frame
+    //---------------------------------------------------------------------------------------------------
+    // Function declarations
 
-//---------------------------------------------------------------------------------------------------
-// Function declarations
-
-void MadgwickAHRS_Update(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
-void MadgwickAHRS_Update(float gx, float gy, float gz, float ax, float ay, float az);
-
+    void Update(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
+    void Update(float gx, float gy, float gz, float ax, float ay, float az);
+}
 #endif
 //=====================================================================================================
 // End of file
