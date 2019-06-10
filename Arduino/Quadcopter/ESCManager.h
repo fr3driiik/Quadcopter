@@ -7,22 +7,22 @@
 
 /*
  * ESC settings:
- * stop/arm   1060 µs 
- * full power 1860 µs
+ * stop/arm   1060 Âµs 
+ * full power 1860 Âµs
  */
 
 /*
  * ARDUINO
  * PWM freq for pin 3, 5, 6, 9 (timer 2, 3, 4) = 490 Hz
- * 490Hz -> pulseLength = 2040.8163265306 µs
- * 8 bit res -> 256 steps, each step = 7.97193878 µs
+ * 490Hz -> pulseLength = 2040.8163265306 Âµs
+ * 8 bit res -> 256 steps, each step = 7.97193878 Âµs
  * min = 132 
- * max = 232,407 analogWrite Value. Detta ger endast 100 steg, har möjlighet får 800st
+ * max = 232,407 analogWrite Value. Detta ger endast 100 steg, har mÃ¶jlighet fÃ¥r 800st
  * Steps: 100 -> one step = 8 steps for esc. Losing much precision! (TODO: fix with pwm timers?)
  * 
  * TEENSY 3.6
- * 500Hz -> pulseLength = 2000 µs
- * 12 bit res -> 4096 steps, each step = 0.48828125 µs
+ * 500Hz -> pulseLength = 2000 Âµs
+ * 12 bit res -> 4096 steps, each step = 0.48828125 Âµs
  * min = 2170.88 ( 2170.88 * stepLength = 1060)
  * max = 3809.28 ( 3809.28 * stepLength = 1060)
  * Steps: 1639 -> esc will only be able to detech two-steps
@@ -47,3 +47,4 @@ namespace ESCManager {
 }
 
 #endif
+

@@ -59,3 +59,4 @@ bool GPS::read() {
   }
   return false;
 }
+
