@@ -27,9 +27,9 @@
 
 #define OUTPUT__BAUD_RATE 115200
 #define DEBUG_OUTPUT false
-#define PRINT_SENSOR_DATA false
+#define PRINT_SENSOR_DATA true
 #define PRINT_PYR_DATA false
-#define PRINT_STATE true
+#define PRINT_STATE false
 #define PRINT_GPS_DATA false
 #define PRINT_LOOP_TIME_OVER false
 
@@ -37,16 +37,16 @@ unsigned long timer;
 unsigned long timer1HZ;
 unsigned long timer10HZ;
 
-void init_sensors() {
-  Gyro_Init();
-  Accel_Init();
-  Magn_Init();
+void initSensors() {
+  Sensors::initGyro();
+  Sensors::initAcc();
+  Sensors::initMag();
 }
 
-void read_sensors() {
-  Read_Gyro();
-  Read_Accel();
-  Read_Magn();
+void readSensors() {
+  Sensors::readGyro();
+  Sensors::readAcc();
+  Sensors::readMag();
 }
 
 void setup() {
@@ -54,8 +54,8 @@ void setup() {
     Serial.begin(OUTPUT__BAUD_RATE);
     Serial.println("\nInitializing..");
     Wire.begin();
-    Wire.setClock(I2C_SPEED);
-    init_sensors();
+    //Wire.setClock(I2C_SPEED);
+    initSensors();
     GPS::initialize();
     Receiver::initialize();
     ESCManager::initialize();
@@ -70,7 +70,7 @@ void loop() {
     float deltaTime = (millis() - timer) / 1000.0000f;
     timer = millis();
     Receiver::loop();
-    read_sensors();
+    readSensors();
 
     float dt1HZ = (micros() - timer1HZ) / 1000000.0000f;
     if (dt1HZ >= 1.0f) {
@@ -90,21 +90,14 @@ void loop() {
       #endif
     }
     IMU::update(deltaTime);
-    #if PRINT_PYR_DATA
-      print_pyr();
-    #endif
-    #if PRINT_SENSOR_DATA     
-      print_sensor_data();
-    #endif
 
     if(Receiver::throttleIn > 0.05){ //calc PIDS and run engines accordingly
-
       //calc stab pids
       computeStabPids(deltaTime);
 
       //yaw change desired? overwrite stab output
       if(abs(Receiver::yawIn) > 0.05){
-        yaw_stab_output = fromDecimalPercent(Receiver::yawIn, -YAW_MAX_DPS, YAW_MAX_DPS);
+        yaw_stab_output = Utils::fromDecimalPercent(Receiver::yawIn, -YAW_MAX_DPS, YAW_MAX_DPS);
         yaw_target = yawDegrees;
       }
 
@@ -151,5 +144,10 @@ inline void do1HZ(float dt) {
 }
 
 inline void do10HZ(float dt) {
-  
+  #if PRINT_PYR_DATA
+    print_pyr();
+  #endif
+  #if PRINT_SENSOR_DATA     
+    print_sensor_data();
+  #endif
 }

@@ -23,45 +23,45 @@ IMU::State IMU::getState() {
 
 void IMU::update(float dt) {
   #ifdef USE_SIMPLE_BIAS_FILTER
-    state.pitchDegrees += gyro[PITCH] * dt;
-    state.yawDegrees += gyro[YAW] * dt;
-    state.rollDegrees += gyro[ROLL] * dt;
+    state.pitchDegrees += Sensors::gyro[PITCH] * dt;
+    state.yawDegrees += Sensors::gyro[YAW] * dt;
+    state.rollDegrees += Sensors::gyro[ROLL] * dt;
   
-    // compensate pitch and roll drift with accelerometer
-    if (abs(accel[ROLL]) > 0.0f && abs(accel[PITCH]) > 0.0f) {
-      float accPitch = -atan2(accel[ROLL], accel[YAW]) * RAD_TO_DEG;
-      float accRoll = atan2(accel[PITCH], accel[YAW]) * RAD_TO_DEG;
+    // compensate pitch and roll drift with Sensors::accelerometer
+    if (abs(Sensors::accel[ROLL]) > 0.0f && abs(Sensors::accel[PITCH]) > 0.0f) {
+      float accPitch = -atan2(Sensors::accel[ROLL], Sensors::accel[YAW]) * RAD_TO_DEG;
+      float accRoll = atan2(Sensors::accel[PITCH], Sensors::accel[YAW]) * RAD_TO_DEG;
       state.pitchDegrees = HP_FACTOR * state.pitchDegrees + LP_FACTOR * accPitch;
       state.rollDegrees = HP_FACTOR * state.rollDegrees + LP_FACTOR * accRoll;
     }
     state.pitch = state.pitchDegrees * DEGREES_TO_RADIANS;
     state.roll = state.rollDegrees * DEGREES_TO_RADIANS;
   
-    #ifdef MAGNETOMETER
-      //compensate yaw drift with magnetometer 
+    #ifdef MAGENETOMETER
+      //compensate yaw drift with Sensors::magnetometer 
       //https://github.com/jarzebski/Arduino-HMC5883L/blob/master/HMC5883L_compensation_MPU6050/HMC5883L_compensation_MPU6050.ino
       if (!(state.rollDegrees > 45 || state.rollDegrees < -45 || state.pitchDegrees > 45 || state.pitchDegrees < -45)) { //hm is this not in radians?
         float cosRoll = cos(state.roll);
         float sinRoll = sin(state.roll);
         float cosPitch = cos(state.pitch);
         float sinPitch = sin(state.pitch);
-        float xh = magnetom[ROLL] * cosPitch + magnetom[YAW] * sinPitch;
-        float yh = magnetom[ROLL] * sinRoll * sinPitch + magnetom[PITCH] * cosRoll - magnetom[YAW] * sinRoll * cosPitch;
+        float xh = Sensors::magnetom[ROLL] * cosPitch + Sensors::magnetom[YAW] * sinPitch;
+        float yh = Sensors::magnetom[ROLL] * sinRoll * sinPitch + Sensors::magnetom[PITCH] * cosRoll - Sensors::magnetom[YAW] * sinRoll * cosPitch;
         state.yawDegrees = state.yaw * RADIANS_TO_DEGREES;
       }
     #endif
     //update quaternion
     Utils::eulerToQuaternion(state.pitch, state.yaw, state.roll, &(state.qx), &(state.qy), &(state.qz), &(state.qw));
   #else // USE_SIMPLE_BIAS_FILTER
-    #ifdef MAGNETOMETER
+    #ifdef Sensors::magnetomETER
       //TODO use state.quaternions ..
-      MadgwickAHRS_Update(gyro[PITCH], gyro[YAW], gyro[ROLL], accel[PITCH], accel[YAW], accel[ROLL], magnetom[PITCH], magnetom[YAW], magnetom[ROLL]);
+      MadgwickAHRS_Update(Sensors::gyro[PITCH], Sensors::gyro[YAW], Sensors::gyro[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW], Sensors::accel[ROLL], Sensors::magnetom[PITCH], Sensors::magnetom[YAW], Sensors::magnetom[ROLL]);
       state.qx = q0; //  change to MadgwickAHRS::q0
       state.qy = q1;
       state.qz = q2;
       state.qw = q3;
     #else
-      MadgwickAHRS_Update(gyro[PITCH], gyro[YAW], gyro[ROLL], accel[PITCH], accel[YAW], accel[ROLL]);
+      MadgwickAHRS_Update(Sensors::gyro[PITCH], Sensors::gyro[YAW], Sensors::gyro[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW], Sensors::accel[ROLL]);
       state.qx = q0;
       state.qy = q1;
       state.qz = q2;
@@ -78,9 +78,9 @@ void IMU::update(float dt) {
 
   state.yaw = state.yawDegrees * DEGREES_TO_RADIANS;
 
-  Utils::qQuaternionToRotationMatrix(state.qx, state.qy, state.qz, state.qw, state.rotationMatrix);
+  Utils::quaternionToRotationMatrix(state.qx, state.qy, state.qz, state.qw, state.rotationMatrix);
   Utils::matrix3x3Inverse(state.rotationMatrix, state.rotationMatrixInv);
-  Utils::rotate(state.rotationMatrixInv, accel[PITCH], accel[ROLL], accel[YAW], &(state.accNorth), &(state.accEast), &(state.accDown));
+  Utils::rotate(state.rotationMatrixInv, Sensors::accel[PITCH], Sensors::accel[ROLL], Sensors::accel[YAW], &(state.accNorth), &(state.accEast), &(state.accDown));
 
   state.accDown -= 1.00; //remove gravity
 
@@ -97,5 +97,3 @@ void IMU::updateGPS(float dt) {
 
   #endif
 }
-
-

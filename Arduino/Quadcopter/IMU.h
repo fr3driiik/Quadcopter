@@ -6,6 +6,10 @@
 #include "Config.h"
 #include <math.h>
 
+#define PITCH Y_AXIS
+#define YAW		Z_AXIS
+#define ROLL	X_AXIS
+
 #define USE_SIMPLE_BIAS_FILTER
 
 namespace IMU {
@@ -24,5 +28,3 @@ namespace IMU {
   void updateGPS(float dt); //only if gps is enabled
 }
 #endif
-
-

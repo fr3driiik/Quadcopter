@@ -153,10 +153,8 @@ namespace Receiver {
   
       rollIn = map(rollInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
       pitchIn = -map(pitchInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
-      throttleIn = toDecimalPercent(throttleInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX);
+      throttleIn = Utils::toDecimalPercent(throttleInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX);
       yawIn = -map(yawInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX, -135, 135); 
   }
 }
 #endif
-
-

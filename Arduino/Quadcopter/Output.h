@@ -7,17 +7,17 @@
 void print_sensor_data(){
   Serial.print("SENSORS[x:y:z]");
   Serial.print("  Gyro[");
-  Serial.print(gyro[0], 2);Serial.print(" : ");
-  Serial.print(gyro[1], 2);Serial.print(" : ");
-  Serial.print(gyro[2], 2);Serial.print("]");
+  Serial.print(Sensors::gyro[0], 2);Serial.print(" : ");
+  Serial.print(Sensors::gyro[1], 2);Serial.print(" : ");
+  Serial.print(Sensors::gyro[2], 2);Serial.print("]");
   Serial.print("  Accel[");
-  Serial.print(accel[0], 2);Serial.print(" : ");
-  Serial.print(accel[1], 2);Serial.print(" : ");
-  Serial.print(accel[2], 2);Serial.print("]");
+  Serial.print(Sensors::accel[0], 2);Serial.print(" : ");
+  Serial.print(Sensors::accel[1], 2);Serial.print(" : ");
+  Serial.print(Sensors::accel[2], 2);Serial.print("]");
   Serial.print("  Magneto[");
-  Serial.print(magnetom[0], 2);Serial.print(" : ");
-  Serial.print(magnetom[1], 2);Serial.print(" : ");
-  Serial.print(magnetom[2], 2);Serial.print("]");
+  Serial.print(Sensors::magnetom[0], 2);Serial.print(" : ");
+  Serial.print(Sensors::magnetom[1], 2);Serial.print(" : ");
+  Serial.print(Sensors::magnetom[2], 2);Serial.print("]");
   Serial.println();
 }
 

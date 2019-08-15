@@ -6,12 +6,13 @@
 
 //Select board
 //#define Arduino_Pro_Micro
-#define Arduino_Mega_2560
-//#define Teensy_3_6
+//#define Arduino_Mega_2560
+#define Teensy_3_6
 
 //Sensors
 //#define MAGNETOMETER
 //#define GPS
+#define LSM9DS0
 
 //Rotations
 #define ROLL_PITCH_MAX_ANGLE 45
@@ -90,4 +91,3 @@
 #endif
 
 #endif
-

@@ -70,5 +70,3 @@ void setStablePidsIntegralLimits(float low, float high){
 }
 
 #endif
-
-
