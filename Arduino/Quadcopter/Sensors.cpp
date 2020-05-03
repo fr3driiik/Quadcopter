@@ -1,5 +1,13 @@
 #include "Sensors.h"
 
+float Sensors::gyro[3] = {0, 0, 0};
+float Sensors::accel[3] = {0, 0, 0};
+float Sensors::magnetom[3] = {0, 0, 0};
+
+int num_gyro_errors = 0;
+int num_accel_errors = 0;
+int num_magn_errors = 0;
+
 void writeI2CByte(uint8_t address, uint8_t reg, uint8_t data) {
   Wire.beginTransmission(address);
   Wire.write(reg);
@@ -124,13 +132,6 @@ void readI2CBytes(uint8_t address, uint8_t reg, uint8_t *dest, uint8_t count) {
 #define MAG_Y_OFFSET -78
 #define MAG_Z_OFFSET -118
 
-float Sensors::gyro[3] = {0, 0, 0};
-float Sensors::accel[3] = {0, 0, 0};
-float Sensors::magnetom[3] = {0, 0, 0};
-
-int num_gyro_errors = 0;
-int num_accel_errors = 0;
-int num_magn_errors = 0;
 /*
 void Accel_Init(){
  byte temp[1]{0};

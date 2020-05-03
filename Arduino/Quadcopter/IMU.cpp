@@ -40,7 +40,7 @@ void IMU::update(float dt) {
     #ifdef MAGENETOMETER
       //compensate yaw drift with Sensors::magnetometer 
       //https://github.com/jarzebski/Arduino-HMC5883L/blob/master/HMC5883L_compensation_MPU6050/HMC5883L_compensation_MPU6050.ino
-      if (!(state.rollDegrees > 45 || state.rollDegrees < -45 || state.pitchDegrees > 45 || state.pitchDegrees < -45)) { //hm is this not in radians?
+      if (!(state.rollDegrees > 45 || state.rollDegrees < -45 || state.pitchDegrees > 45 || state.pitchDegrees < -45)) {
         float cosRoll = cos(state.roll);
         float sinRoll = sin(state.roll);
         float cosPitch = cos(state.pitch);
@@ -53,7 +53,7 @@ void IMU::update(float dt) {
     //update quaternion
     Utils::eulerToQuaternion(state.pitch, state.yaw, state.roll, &(state.qx), &(state.qy), &(state.qz), &(state.qw));
   #else // USE_SIMPLE_BIAS_FILTER
-    #ifdef Sensors::magnetomETER
+    #ifdef MAGNETOMETER
       //TODO use state.quaternions ..
       MadgwickAHRS_Update(Sensors::gyro[PITCH], Sensors::gyro[YAW], Sensors::gyro[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW], Sensors::accel[ROLL], Sensors::magnetom[PITCH], Sensors::magnetom[YAW], Sensors::magnetom[ROLL]);
       state.qx = q0; //  change to MadgwickAHRS::q0

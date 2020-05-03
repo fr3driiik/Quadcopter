@@ -23,7 +23,7 @@ void print_sensor_data(){
 
 void print_pyr() {
   IMU::State s = IMU::getState();
-  Serial.print("p:");Serial.print(s.pitch);Serial.print("y:");Serial.print(s.yaw);Serial.print("r:");Serial.print(s.roll);
+  Serial.print("p:");Serial.print(s.pitchDegrees);Serial.print("y:");Serial.print(s.yawDegrees);Serial.print("r:");Serial.print(s.rollDegrees);
   Serial.println();
 }
 
@@ -46,5 +46,3 @@ void print_gps() {
 }
 
 #endif
-
-
