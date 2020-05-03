@@ -30,8 +30,9 @@ void print_pyr() {
 void print_state() {
   IMU::State s = IMU::getState();
   String stringStart = "";
-  //we dont print quaternion or rotationMatrix, they are not understandable..
+  //we dont print rotationMatrix, not understandable..
   Serial.println(stringStart + "Pitch: " + s.pitchDegrees + " Yaw: " + s.yawDegrees + " Roll: " + s.rollDegrees);
+  Serial.println(stringStart + "QX: " + s.qx + " QY: " + s.qy + " QZ: " + s.qz + " QW: " + s.qw);
   Serial.println(stringStart + "AccNorth: " + s.accNorth + " AccEast: " + s.accEast + " AccDown: " + s.accDown);
   Serial.println(stringStart + "VeloNorth: " + s.veloNorth + " VeloEast: " + s.veloEast + " VeloDown: " + s.veloDown);
   Serial.println(stringStart + "Longitude: " + s.longitude + " Latitude: " + s.latitude);

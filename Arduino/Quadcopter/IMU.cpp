@@ -54,20 +54,20 @@ void IMU::update(float dt) {
     Utils::eulerToQuaternion(state.pitch, state.yaw, state.roll, &(state.qx), &(state.qy), &(state.qz), &(state.qw));
   #else // USE_SIMPLE_BIAS_FILTER
     #ifdef MAGNETOMETER
-      //TODO use state.quaternions ..
-      MadgwickAHRS_Update(Sensors::gyro[PITCH], Sensors::gyro[YAW], Sensors::gyro[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW], Sensors::accel[ROLL], Sensors::magnetom[PITCH], Sensors::magnetom[YAW], Sensors::magnetom[ROLL]);
-      state.qx = q0; //  change to MadgwickAHRS::q0
-      state.qy = q1;
-      state.qz = q2;
-      state.qw = q3;
+      MadgwickAHRS::Update(Sensors::gyro[PITCH], Sensors::gyro[YAW], Sensors::gyro[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW], Sensors::accel[ROLL], Sensors::magnetom[PITCH], Sensors::magnetom[YAW], Sensors::magnetom[ROLL]);
+      state.qx = MadgwickAHRS::q0; //  change to MadgwickAHRS::q0
+      state.qy = MadgwickAHRS::q1;
+      state.qz = MadgwickAHRS::q2;
+      state.qw = MadgwickAHRS::q3;
     #else
-      MadgwickAHRS_Update(Sensors::gyro[PITCH], Sensors::gyro[YAW], Sensors::gyro[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW], Sensors::accel[ROLL]);
-      state.qx = q0;
-      state.qy = q1;
-      state.qz = q2;
-      state.qw = q3;
+      MadgwickAHRS::Update(Sensors::gyro[PITCH], Sensors::gyro[YAW], Sensors::gyro[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW], Sensors::accel[ROLL]);
+      state.qx = MadgwickAHRS::q0;
+      state.qy = MadgwickAHRS::q1;
+      state.qz = MadgwickAHRS::q2;
+      state.qw = MadgwickAHRS::q3;
     #endif
-
+  Utils::quaternionToEuler(state.qx, state.qy, state.qz, state.qw, &state.pitch, &state.yaw, &state.roll);
+  state.pitchDegrees = state.pitch * RADIANS_TO_DEGREES;
   #endif // use madgewick kalman
   
   //wrap yaw between -180 and 180

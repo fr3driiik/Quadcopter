@@ -4,13 +4,14 @@
 #include "Sensors.h"
 #include "Utils.h"
 #include "Config.h"
+#include "MadgwickAHRS.h"
 #include <math.h>
 
 #define PITCH Y_AXIS
 #define YAW		Z_AXIS
 #define ROLL	X_AXIS
 
-#define USE_SIMPLE_BIAS_FILTER
+// #define USE_SIMPLE_BIAS_FILTER
 
 namespace IMU {
   struct State {

@@ -10,7 +10,7 @@
 #define Teensy_3_6
 
 //Sensors
-//#define MAGNETOMETER
+#define MAGNETOMETER
 //#define GPS
 #define LSM9DS0
 
