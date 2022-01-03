@@ -18,12 +18,14 @@ void print_sensor_data(){
   Serial.print(Sensors::magnetom[0], 2);Serial.print(" : ");
   Serial.print(Sensors::magnetom[1], 2);Serial.print(" : ");
   Serial.print(Sensors::magnetom[2], 2);Serial.print("]");
+  Serial.print("  Temperature: ");Serial.print(Sensors::temperature, 2);
   Serial.println();
 }
 
 void print_pyr() {
   IMU::State s = IMU::getState();
-  Serial.print("p:");Serial.print(s.pitchDegrees);Serial.print("y:");Serial.print(s.yawDegrees);Serial.print("r:");Serial.print(s.rollDegrees);
+  //Serial.print("p:");Serial.print(s.pitchDegrees);Serial.print("y:");Serial.print(s.yawDegrees);Serial.print("r:");Serial.print(s.rollDegrees);
+  Serial.print("roll:");Serial.print(s.rollDegrees);Serial.print(", pitch:");Serial.print(s.pitchDegrees);Serial.print(", yaw:");Serial.print(s.yawDegrees);
   Serial.println();
 }
 

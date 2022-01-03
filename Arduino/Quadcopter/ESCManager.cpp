@@ -1,12 +1,12 @@
 #include "ESCManager.h"
 
 void ESCManager::initialize() {
-  #ifdef Teensy_3_6
+  #if defined(Teensy_3_6) || defined(Teensy_4_0)
     analogWriteResolution(12);
   #endif
   for (int i = 0; i < ESC_COUNT; i++) {
     pinMode(escs[i].escPin, OUTPUT);
-    #ifdef Teensy_3_6
+    #if defined(Teensy_3_6) || defined(Teensy_4_0)
       analogWriteFrequency(escs[i].escPin, 500);
     #endif
   }

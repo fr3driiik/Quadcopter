@@ -7,7 +7,8 @@
 //Select board
 //#define Arduino_Pro_Micro
 //#define Arduino_Mega_2560
-#define Teensy_3_6
+//#define Teensy_3_6
+#define Teensy_4_0
 
 //Sensors
 #define MAGNETOMETER
@@ -49,6 +50,15 @@
   #define CHANNEL6_INPUT_PIN A10
   #define CHANNEL7_INPUT_PIN A9
   #define CHANNEL8_INPUT_PIN A8
+#elif defined(Teensy_4_0)
+  #define CHANNEL1_INPUT_PIN 15 //roll
+  #define CHANNEL2_INPUT_PIN 14 //pitch
+  #define CHANNEL3_INPUT_PIN 13 //throttle
+  #define CHANNEL4_INPUT_PIN 12 //yaw
+  #define CHANNEL5_INPUT_PIN 11
+  #define CHANNEL6_INPUT_PIN 10
+  #define CHANNEL7_INPUT_PIN 9
+  #define CHANNEL8_INPUT_PIN 8
 #endif
 
 //ESC
@@ -74,6 +84,13 @@
     {6, 1.0, -1.0, 1.0},   //RL
     {9, -1.0, 1.0, 1.0}    //FL
   };
+#elif defined(Teensy_4_0)
+  const ESC escs[] = {
+    {3, -1.0, -1.0, -1.0}, //FR
+    {5, 1.0, 1.0, -1.0},   //RR
+    {6, 1.0, -1.0, 1.0},   //RL
+    {9, -1.0, 1.0, 1.0}    //FL
+  };
 #endif
 
 //Battery
@@ -87,6 +104,8 @@
 #elif defined(Arduino_Mega_2560)
   #define BOARD_VOLTAGE 5.0
 #elif defined(Teensy_3_6)
+  #define BOARD_VOLTAGE 3.3
+#elif defined(Teensy_4_0)
   #define BOARD_VOLTAGE 3.3
 #endif
 

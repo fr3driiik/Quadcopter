@@ -95,7 +95,7 @@ namespace Receiver {
   }
   
   void initialize() {
-    #ifdef Teensy_3_6
+    #if defined(Teensy_3_6) || defined(Teensy_4_0)
       attachInterrupt(CHANNEL1_INPUT_PIN, calcChannel1, CHANGE);
       attachInterrupt(CHANNEL2_INPUT_PIN, calcChannel2, CHANGE);
       attachInterrupt(CHANNEL3_INPUT_PIN, calcChannel3, CHANGE);

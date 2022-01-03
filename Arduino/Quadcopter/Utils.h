@@ -27,25 +27,29 @@ namespace Utils {
     *qw = cy * cr * cp + sy * sr * sp;
   }
 
-  void inline quaternionToEuler(float qx, float qy, float qz, float qw, float *pitch, float *yaw, float *roll) {
-    // roll (x-axis rotation)
-    double sinr_cosp = 2 * (qw * qx + qy * qz);
-    double cosr_cosp = 1 - 2 * (qx * qx + qy * qy);
-    *roll = atan2(sinr_cosp, cosr_cosp);
+  void inline quaternionToEuler(float qx, float qy, float qz, float qw, float *eulerx, float *eulery, float *eulerz) {
+//    from wikipedia with other result than adafruits
+//    // roll (x-axis rotation)
+//    double sinr_cosp = 2 * (qw * qx + qy * qz);
+//    double cosr_cosp = 1 - 2 * (qx * qx + qy * qy);
+//    *eulerx = atan2(sinr_cosp, cosr_cosp);
+//
+//    // pitch (y-axis rotation)
+//    double sinp = 2 * (qw * qy - qz * qx);
+//    if (abs(sinp) >= 1) {
+//        *eulery = copysign(M_PI / 2, sinp); // use 90 degrees if out of range
+//    } else {
+//        *eulery = asin(sinp);
+//    }
+//
+//    // yaw (z-axis rotation)
+//    double siny_cosp = 2 * (qw * qz + qx * qy);
+//    double cosy_cosp = 1 - 2 * (qy * qy + qz * qz);
+//    *eulerz = atan2(siny_cosp, cosy_cosp);
 
-    // pitch (y-axis rotation)
-    double sinp = 2 * (qw * qy - qz * qx);
-    if (abs(sinp) >= 1) {
-        *pitch = M_PI / 2; // use 90 degrees if out of range
-    } else {
-        *pitch = asin(sinp);
-    }
-
-    // yaw (z-axis rotation)
-    double siny_cosp = 2 * (qw * qz + qx * qy);
-    double cosy_cosp = 1 - 2 * (qy * qy + qz * qz);
-    *yaw = atan2(siny_cosp, cosy_cosp);
-    Serial.println(*yaw);
+      *eulerx = atan2f(qw * qx + qy * qz, 0.5f - qx * qx - qy * qy);
+      *eulery = asinf(-2.0f * (qx * qz - qw * qy));
+      *eulerz = atan2f(qx * qy + qw * qz, 0.5f - qy * qy - qz * qz);
   }
 
   // Quaternion should be normalized before this call
@@ -88,7 +92,7 @@ namespace Utils {
               + matrix[0][2] * (m10x21 - m11x20);
 
     if (det == 0) {
-      Serial.println("Matrix det division by 0 avoided.");
+      Serial.println("Matrix division by 0 avoided.");
       return;
     }
     float invdet = 1 / det;
@@ -111,4 +115,3 @@ namespace Utils {
   }
 }
 #endif
-

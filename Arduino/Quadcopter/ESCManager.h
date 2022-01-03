@@ -37,6 +37,9 @@
 #elif defined(Teensy_3_6)
   #define ESC_MIN 2170
   #define ESC_MAX 3809
+#elif defined(Teensy_4_0)
+  #define ESC_MIN 2170
+  #define ESC_MAX 3809
 #endif
 namespace ESCManager {
   void initialize();
@@ -47,4 +50,3 @@ namespace ESCManager {
 }
 
 #endif
-

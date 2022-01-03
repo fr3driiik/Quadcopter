@@ -3,6 +3,7 @@
 float Sensors::gyro[3] = {0, 0, 0};
 float Sensors::accel[3] = {0, 0, 0};
 float Sensors::magnetom[3] = {0, 0, 0};
+float Sensors::temperature = 0;
 
 int num_gyro_errors = 0;
 int num_accel_errors = 0;
@@ -31,7 +32,7 @@ void readI2CBytes(uint8_t address, uint8_t reg, uint8_t *dest, uint8_t count) {
 	#define LSM9DS0_G	      0x6B
 
   //GYRO PART
-  #define GYRO_RES        2000.0 / 32768.0
+  #define GYRO_RES        2000.0 / 32768.0  // dps
 	#define OUT_X_L_G	      0x28
   #define CTRL_REG1_G     0x20
   #define CTRL_REG2_G     0x21
@@ -39,19 +40,39 @@ void readI2CBytes(uint8_t address, uint8_t reg, uint8_t *dest, uint8_t count) {
   #define CTRL_REG4_G     0x23
   #define CTRL_REG5_G     0x24
 
-  //ACC MAG PART
-  #define ACC_RES         2.0 / 32768.0
-  #define MAG_RES         2.0 / 32768.0
-	#define OUT_X_L_M	      0x08
-	#define OUT_X_L_A	      0x28
-  #define CTRL_REG0_XM    0x1F
-  #define CTRL_REG1_XM    0x20
-  #define CTRL_REG2_XM    0x21
-  #define CTRL_REG3_XM    0x22
-  #define CTRL_REG4_XM    0x23
-  #define CTRL_REG5_XM    0x24
-  #define CTRL_REG6_XM    0x25
-  #define CTRL_REG7_XM    0x26
+  //ACC MAG TEMP PART
+  #define ACC_RES             2.0 / 32768.0 // g
+  #define MAG_RES             2000.0 / 32768.0  // mgauss
+  #define TEMPERATURE_OFFSET  21.0  // celsius. Not documented, so just a guess
+  #define TEMPERATURE_RES     1.0 / 8.0
+  #define TEMP_OUT_L_XM       0x05
+	#define OUT_X_L_M	          0x08
+	#define OUT_X_L_A	          0x28
+  #define CTRL_REG0_XM        0x1F
+  #define CTRL_REG1_XM        0x20
+  #define CTRL_REG2_XM        0x21
+  #define CTRL_REG3_XM        0x22
+  #define CTRL_REG4_XM        0x23
+  #define CTRL_REG5_XM        0x24
+  #define CTRL_REG6_XM        0x25
+  #define CTRL_REG7_XM        0x26
+
+  const float gyro_calibration[3] = {-25, 15, 25};  // raw reading offset
+  const float accel_calibration[3] = {1530, 565, 650};  // raw reading offset
+  // magnetometer calibration values calculated using adafruit sensor calibration and MotionCal
+  const float magnetom_offset[3] = {-53.8/MAG_RES, 58.4/MAG_RES, -32.7/MAG_RES};  // raw reading offset. (mgauss to raw)
+  const float magnetom_soft_iron[3][3] = {
+    {0.927, -0.064, 0.007},
+    {-0.064, 1.064, 0.004},
+    {0.007, 0.004, 1.018},
+  };
+  const float magnetom_field_strength = 446.9;  // mgauss. unused for now
+  
+  void Sensors::initialize() {
+    Sensors::initGyro();
+    Sensors::initAcc();
+    Sensors::initMag();
+  }
 
 	void Sensors::initGyro() {
     //Bits[7:0]: DR1 DR0 BW1 BW0 PD Zen Xen Yen
@@ -77,7 +98,7 @@ void readI2CBytes(uint8_t address, uint8_t reg, uint8_t *dest, uint8_t count) {
 
 	void Sensors::initMag() {
     //Bits (7-0): TEMP_EN M_RES1 M_RES0 M_ODR2 M_ODR1 M_ODR0 LIR2 LIR1
-    writeI2CByte(LSM9DS0_XM, CTRL_REG5_XM, 0b00010100);
+    writeI2CByte(LSM9DS0_XM, CTRL_REG5_XM, 0b10010100);
 
     //Bits (7-0): 0 MFS1 MFS0 0 0 0 0 0
     writeI2CByte(LSM9DS0_XM, CTRL_REG6_XM, 0b00000000);
@@ -86,29 +107,48 @@ void readI2CBytes(uint8_t address, uint8_t reg, uint8_t *dest, uint8_t count) {
     writeI2CByte(LSM9DS0_XM, CTRL_REG7_XM, 0b00000000);
 	}
 
+   void Sensors::loop() {
+    // Might change this to be triggered by interrupts instead
+    Sensors::readGyro();
+    Sensors::readAcc();
+    Sensors::readMag();
+    Sensors::readTemp();
+  }
+
 	void Sensors::readGyro() {
 		uint8_t temp[6];
 		readI2CBytes(LSM9DS0_G, OUT_X_L_G | 0x80, temp, 6);
-		Sensors::gyro[X_AXIS] = GYRO_RES * (int16_t)((temp[1] << 8) | temp[0]);
-		Sensors::gyro[Y_AXIS] = GYRO_RES * (int16_t)((temp[3] << 8) | temp[2]);
-		Sensors::gyro[Z_AXIS] = GYRO_RES * (int16_t)((temp[5] << 8) | temp[4]);
+		Sensors::gyro[X_AXIS] = GYRO_RES * ((int16_t)((temp[1] << 8) | temp[0]) + gyro_calibration[X_AXIS]);
+		Sensors::gyro[Y_AXIS] = GYRO_RES * ((int16_t)((temp[3] << 8) | temp[2]) + gyro_calibration[Y_AXIS]);
+		Sensors::gyro[Z_AXIS] = GYRO_RES * ((int16_t)((temp[5] << 8) | temp[4]) + gyro_calibration[Z_AXIS]);
 	}
 
 	void Sensors::readAcc() {
 		uint8_t temp[6];
 		readI2CBytes(LSM9DS0_XM, OUT_X_L_A | 0x80, temp, 6);
-		Sensors::accel[X_AXIS] = ACC_RES * (int16_t)((temp[1] << 8) | temp[0]);
-		Sensors::accel[Y_AXIS] = ACC_RES * (int16_t)((temp[3] << 8) | temp[2]);
-		Sensors::accel[Z_AXIS] = ACC_RES * (int16_t)((temp[5] << 8) | temp[4]);
+		Sensors::accel[X_AXIS] = ACC_RES * ((int16_t)((temp[1] << 8) | temp[0]) + accel_calibration[X_AXIS]);
+		Sensors::accel[Y_AXIS] = ACC_RES * ((int16_t)((temp[3] << 8) | temp[2]) + accel_calibration[Y_AXIS]);
+		Sensors::accel[Z_AXIS] = ACC_RES * ((int16_t)((temp[5] << 8) | temp[4]) + accel_calibration[Z_AXIS]);
 	}
 
 	void Sensors::readMag() {
-		uint8_t temp[6];
-		readI2CBytes(LSM9DS0_XM, OUT_X_L_M | 0x80, temp, 6);
-		Sensors::magnetom[X_AXIS] = MAG_RES * (int16_t)((temp[1] << 8) | temp[0]);
-		Sensors::magnetom[Y_AXIS] = MAG_RES * (int16_t)((temp[3] << 8) | temp[2]);
-		Sensors::magnetom[Z_AXIS] = MAG_RES * (int16_t)((temp[5] << 8) | temp[4]);
+    uint8_t temp[6];
+    readI2CBytes(LSM9DS0_XM, OUT_X_L_M | 0x80, temp, 6);
+    int16_t x = MAG_RES * ((int16_t)((temp[1] << 8) | temp[0]) + magnetom_offset[X_AXIS]);
+    int16_t y = MAG_RES * ((int16_t)((temp[3] << 8) | temp[2]) + magnetom_offset[Y_AXIS]);
+    int16_t z = MAG_RES * ((int16_t)((temp[5] << 8) | temp[4]) + magnetom_offset[Z_AXIS]);
+
+    //soft iron calibration
+    Sensors::magnetom[X_AXIS] = x * magnetom_soft_iron[0][0] + y * magnetom_soft_iron[0][1] + z * magnetom_soft_iron[0][2];
+    Sensors::magnetom[Y_AXIS] = x * magnetom_soft_iron[1][0] + y * magnetom_soft_iron[1][1] + z * magnetom_soft_iron[1][2];
+    Sensors::magnetom[Z_AXIS] = x * magnetom_soft_iron[2][0] + y * magnetom_soft_iron[2][1] + z * magnetom_soft_iron[2][2];
 	}
+
+  void Sensors::readTemp() {
+    uint8_t temp[2];
+    readI2CBytes(LSM9DS0_XM, TEMP_OUT_L_XM | 0x80, temp, 2);
+    Sensors::temperature = TEMPERATURE_OFFSET + TEMPERATURE_RES * (int16_t)((temp[1] << 8) | temp[0]);
+  }
 #endif // LSM9DS0
 
 

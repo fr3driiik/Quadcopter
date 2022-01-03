@@ -11,8 +11,6 @@
 #define YAW		Z_AXIS
 #define ROLL	X_AXIS
 
-// #define USE_SIMPLE_BIAS_FILTER
-
 namespace IMU {
   struct State {
     float qx, qy, qz, qw; //quaternion

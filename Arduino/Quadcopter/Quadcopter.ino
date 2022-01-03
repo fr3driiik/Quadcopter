@@ -22,55 +22,43 @@
 #include "ESCManager.h"
 
 #define I2C_SPEED 400000 //400kHz = fast mode
-#define DESIRED_HZ 200 //5ms
-#define AVAIL_LOOP_TIME (1000 / DESIRED_HZ) //millis
+#define DESIRED_HZ 500 //2ms
+#define AVAIL_LOOP_TIME (1000000 / DESIRED_HZ) //micros
 
 #define OUTPUT__BAUD_RATE 115200
 #define DEBUG_OUTPUT false
 #define PRINT_SENSOR_DATA false
-#define PRINT_PYR_DATA false
-#define PRINT_STATE true
+#define PRINT_PYR_DATA true
+#define PRINT_STATE false
 #define PRINT_GPS_DATA false
-#define PRINT_LOOP_TIME_OVER false
+#define PRINT_LOOP_TIME false
 
 unsigned long timer;
 unsigned long timer1HZ;
 unsigned long timer10HZ;
-
-void initSensors() {
-  Sensors::initGyro();
-  Sensors::initAcc();
-  Sensors::initMag();
-}
-
-void readSensors() {
-  Sensors::readGyro();
-  Sensors::readAcc();
-  Sensors::readMag();
-}
 
 void setup() {
     wdt_disable();
     Serial.begin(OUTPUT__BAUD_RATE);
     Serial.println("\nInitializing..");
     Wire.begin();
-    //Wire.setClock(I2C_SPEED);
-    initSensors();
+    Wire.setClock(I2C_SPEED);
+    Sensors::initialize();
     GPS::initialize();
     Receiver::initialize();
     ESCManager::initialize();
     setRatePidsIntegralLimits(-40, 40); //direct engine influence
     setStablePidsIntegralLimits(-202.5, 202.5); //max degrees per second to get right degree
     Serial.println("Ready for takeoff!");
-    wdt_enable(WDTO_500MS);
-    timer = millis();
+    wdt_enable(WDTO_500MS);  // watchdog timer
+    timer = micros();
 }
 
 void loop() {    
-    float deltaTime = (millis() - timer) / 1000.0000f;
-    timer = millis();
+    float deltaTime = (micros() - timer) / 1000000.0000f;
+    timer = micros();
     Receiver::loop();
-    readSensors();
+    Sensors::loop();
 
     float dt1HZ = (micros() - timer1HZ) / 1000000.0000f;
     if (dt1HZ >= 1.0f) {
@@ -79,23 +67,18 @@ void loop() {
     }
 
     float dt10HZ = (micros() - timer10HZ) / 1000000.0000f;
-    if (dt10HZ >= 0.1f) {
+    if (dt10HZ >= 0.01f) {
       timer10HZ = micros();
       do10HZ(dt10HZ);
     }
     
-    if (GPS::read()) { //maybe move to 10hz?
-      #if PRINT_GPS_DATA
-        print_gps();
-      #endif
-    }
     IMU::update(deltaTime);
 
     if(Receiver::throttleIn > 0.05){ //calc PIDS and run engines accordingly
       //calc stab pids
       computeStabPids(deltaTime);
 
-      //yaw change desired? overwrite stab output
+      //yaw change desired? overwrite stab output and yaw target
       if(abs(Receiver::yawIn) > 0.05){
         yaw_stab_output = Utils::fromDecimalPercent(Receiver::yawIn, -YAW_MAX_DPS, YAW_MAX_DPS);
         yaw_target = yawDegrees;
@@ -107,8 +90,9 @@ void loop() {
       ESCManager::setInput(pitch_output, roll_output, yaw_output, Receiver::throttleIn); //should actually feed values in % (pyr -100 - 100, throttle 0-100)
     } else { //too low throttle
       ESCManager::tooLowThrottle();
-      if (DEBUG_OUTPUT)
-        Serial.print("Engines off   ");
+      if (DEBUG_OUTPUT) {
+        Serial.print("Engines off");
+      }
 
       //reset yaw
       yaw_target = yawDegrees;
@@ -119,20 +103,22 @@ void loop() {
 
     //stable hz, wait for desired time
     bool loopTimeExceded = true;
-    #if PRINT_LOOP_TIME_OVER
-      Serial.print("w8:");Serial.print(AVAIL_LOOP_TIME - (millis() - timer));Serial.println();
+    #if PRINT_LOOP_TIME
+      Serial.print("w8:");Serial.print(AVAIL_LOOP_TIME - (micros() - timer));Serial.println();
     #endif
     while(true){
-      long timePassed = millis() - timer;
+      long timePassed = micros() - timer;
       if (timePassed >= AVAIL_LOOP_TIME){
         break;
       } else {
         loopTimeExceded = false;
       }
     }
-    if (loopTimeExceded) {
-      Serial.println("#:TimeExceed");
-    }
+    #if PRINT_LOOP_TIME
+      if (loopTimeExceded) {
+        Serial.println("Loop time exceeded");
+      }
+    #endif
 
     wdt_reset(); //we are still alive  
 } // loop()
@@ -144,6 +130,11 @@ inline void do1HZ(float dt) {
 }
 
 inline void do10HZ(float dt) {
+  if (GPS::read()) {
+    #if PRINT_GPS_DATA
+      print_gps();
+    #endif
+  }
   #if PRINT_PYR_DATA
     print_pyr();
   #endif

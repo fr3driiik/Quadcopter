@@ -16,12 +16,13 @@
 namespace MadgwickAHRS {
     //----------------------------------------------------------------------------------------------------
     // Variable declaration
-    extern volatile float beta;       // algorithm gain
-    extern volatile float q0, q1, q2, q3; // quaternion of sensor frame relative to auxiliary frame
+    extern float beta;       // algorithm gain
+    extern float q0, q1, q2, q3; // quaternion of sensor frame relative to auxiliary frame
 
     //---------------------------------------------------------------------------------------------------
     // Function declarations
 
+    // gyroscope should be in radians/sec
     void Update(float gx, float gy, float gz, float ax, float ay, float az, float mx, float my, float mz);
     void Update(float gx, float gy, float gz, float ax, float ay, float az);
 }
@@ -29,6 +30,3 @@ namespace MadgwickAHRS {
 //=====================================================================================================
 // End of file
 //=====================================================================================================
-
-
-

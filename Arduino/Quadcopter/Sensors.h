@@ -16,6 +16,11 @@ namespace Sensors {
 	extern float gyro[3];
 	extern float accel[3]; 
 	extern float magnetom[3]; 
+  extern float temperature;
+
+  
+  void initialize();
+  void loop();
 
 	void initGyro();
 	void initAcc();
@@ -23,5 +28,6 @@ namespace Sensors {
 	void readGyro();
 	void readAcc();
 	void readMag();
+  void readTemp();
 }
 #endif
