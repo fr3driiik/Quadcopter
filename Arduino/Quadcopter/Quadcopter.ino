@@ -27,8 +27,8 @@
 
 #define OUTPUT__BAUD_RATE 115200
 #define DEBUG_OUTPUT false
-#define PRINT_SENSOR_DATA false
-#define PRINT_PYR_DATA true
+#define PRINT_SENSOR_DATA true
+#define PRINT_PYR_DATA false
 #define PRINT_STATE false
 #define PRINT_GPS_DATA false
 #define PRINT_LOOP_TIME false
@@ -67,7 +67,7 @@ void loop() {
     }
 
     float dt10HZ = (micros() - timer10HZ) / 1000000.0000f;
-    if (dt10HZ >= 0.01f) {
+    if (dt10HZ >= 0.1f) {
       timer10HZ = micros();
       do10HZ(dt10HZ);
     }

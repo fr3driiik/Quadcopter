@@ -8,18 +8,20 @@ IMU::State IMU::getState() {
 
 void IMU::update(float dt) {
   #ifdef MAGNETOMETER
-    MadgwickAHRS::Update(Sensors::gyro[ROLL] * DEGREES_TO_RADIANS, Sensors::gyro[PITCH] * DEGREES_TO_RADIANS, Sensors::gyro[YAW] * DEGREES_TO_RADIANS, Sensors::accel[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW], Sensors::magnetom[ROLL], Sensors::magnetom[PITCH], Sensors::magnetom[YAW]);
-    state.qw = MadgwickAHRS::q0;
-    state.qx = MadgwickAHRS::q1;
-    state.qy = MadgwickAHRS::q2;
-    state.qz = MadgwickAHRS::q3;
+    float magnitude = Utils::vector3Magnitude(Sensors::magnetom);
+    if (abs(magnitude - EARTH_MAGNETIC_FIELD_STRENGTH) <= MAGNETIC_FIELD_MAX_DIFF) {
+      // we only want to trust the magnetometer when it detects the earth magnetic field solely
+      MadgwickAHRS::Update(Sensors::gyro[ROLL] * DEGREES_TO_RADIANS, Sensors::gyro[PITCH] * DEGREES_TO_RADIANS, Sensors::gyro[YAW] * DEGREES_TO_RADIANS, Sensors::accel[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW], Sensors::magnetom[ROLL], Sensors::magnetom[PITCH], Sensors::magnetom[YAW]);
+    } else {
+      MadgwickAHRS::Update(Sensors::gyro[ROLL] * DEGREES_TO_RADIANS, Sensors::gyro[PITCH] * DEGREES_TO_RADIANS, Sensors::gyro[YAW] * DEGREES_TO_RADIANS, Sensors::accel[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW]);
+    }
   #else
     MadgwickAHRS::Update(Sensors::gyro[ROLL] * DEGREES_TO_RADIANS, Sensors::gyro[PITCH] * DEGREES_TO_RADIANS, Sensors::gyro[YAW] * DEGREES_TO_RADIANS, Sensors::accel[ROLL], Sensors::accel[PITCH], Sensors::accel[YAW]);
-    state.qw = MadgwickAHRS::q0;
-    state.qx = MadgwickAHRS::q1;
-    state.qy = MadgwickAHRS::q2;
-    state.qz = MadgwickAHRS::q3;
-  #endif 
+  #endif
+  state.qw = MadgwickAHRS::q0;
+  state.qx = MadgwickAHRS::q1;
+  state.qy = MadgwickAHRS::q2;
+  state.qz = MadgwickAHRS::q3;
   Utils::quaternionToEuler(state.qx, state.qy, state.qz, state.qw, &state.roll, &state.pitch, &state.yaw);
   state.pitchDegrees = state.pitch * RADIANS_TO_DEGREES;
   state.rollDegrees = state.roll * RADIANS_TO_DEGREES;

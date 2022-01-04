@@ -3,7 +3,6 @@
 
 #include "Arduino.h"
 #include "Wire.h"
-#include "Utils.h"
 #include "Config.h"
 
 #define X_AXIS	0

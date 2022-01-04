@@ -12,6 +12,8 @@
 
 //Sensors
 #define MAGNETOMETER
+#define EARTH_MAGNETIC_FIELD_STRENGTH 466.9  // mgauss
+#define MAGNETIC_FIELD_MAX_DIFF 20  // mgauss
 //#define GPS
 #define LSM9DS0
 

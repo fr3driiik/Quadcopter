@@ -66,8 +66,7 @@ void readI2CBytes(uint8_t address, uint8_t reg, uint8_t *dest, uint8_t count) {
     {-0.064, 1.064, 0.004},
     {0.007, 0.004, 1.018},
   };
-  const float magnetom_field_strength = 446.9;  // mgauss. unused for now
-  
+
   void Sensors::initialize() {
     Sensors::initGyro();
     Sensors::initAcc();
