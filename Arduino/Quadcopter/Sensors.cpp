@@ -57,10 +57,10 @@ void readI2CBytes(uint8_t address, uint8_t reg, uint8_t *dest, uint8_t count) {
   #define CTRL_REG6_XM        0x25
   #define CTRL_REG7_XM        0x26
 
-  const float gyro_calibration[3] = {-25, 15, 25};  // raw reading offset
-  const float accel_calibration[3] = {1530, 565, 650};  // raw reading offset
+  const int16_t gyro_calibration[3] = {-25, 15, 25};  // raw reading offset
+  const int16_t accel_calibration[3] = {1530, 565, 650};  // raw reading offset
   // magnetometer calibration values calculated using adafruit sensor calibration and MotionCal
-  const float magnetom_offset[3] = {-53.8/MAG_RES, 58.4/MAG_RES, -32.7/MAG_RES};  // raw reading offset. (mgauss to raw)
+  const int16_t magnetom_offset[3] = {53.8/((float)MAG_RES), -58.4/((float)MAG_RES), 32.7/((float)MAG_RES)};  // raw reading offset. (mgauss to raw)
   const float magnetom_soft_iron[3][3] = {
     {0.927, -0.064, 0.007},
     {-0.064, 1.064, 0.004},
