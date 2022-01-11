@@ -7,7 +7,7 @@ void ESCManager::initialize() {
   for (int i = 0; i < ESC_COUNT; i++) {
     pinMode(escs[i].escPin, OUTPUT);
     #if defined(Teensy_3_6) || defined(Teensy_4_0)
-      analogWriteFrequency(escs[i].escPin, 500);
+      analogWriteFrequency(escs[i].escPin, 490);
     #endif
   }
 }

@@ -2,6 +2,7 @@
 #define OUTPUT_H
 #include "Sensors.h"
 #include "IMU.h"
+#include "Receiver.h"
 #include "GPS.h"
 
 void print_sensor_data(){
@@ -24,8 +25,8 @@ void print_sensor_data(){
 
 void print_pyr() {
   IMU::State s = IMU::getState();
-  Serial.print("roll:");Serial.print(s.rollDegrees);Serial.print(", pitch:");Serial.print(s.pitchDegrees);Serial.print(", yaw:");Serial.print(s.yawDegrees);
-  Serial.println();
+  String stringStart = "";
+  Serial.println(stringStart + "roll:" + s.rollDegrees + ", pitch:" + s.pitchDegrees + ", yaw:" + s.yawDegrees);
 }
 
 void print_state() {
@@ -38,6 +39,11 @@ void print_state() {
   Serial.println(stringStart + "VeloNorth: " + s.veloNorth + " VeloEast: " + s.veloEast + " VeloDown: " + s.veloDown);
   Serial.println(stringStart + "Longitude: " + s.longitude + " Latitude: " + s.latitude);
   Serial.println(stringStart + "Height: " + s.height);
+}
+
+void print_receiver_channels() {
+  String stringStart = "";
+  Serial.println(stringStart + "channelThrottle:" + Receiver::throttleIn + "channelRoll:" + Receiver::rollIn + ", channelPitch:" + Receiver::pitchIn + ", channelYaw:" + Receiver::yawIn);
 }
 
 void print_gps() {

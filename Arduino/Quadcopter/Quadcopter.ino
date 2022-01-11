@@ -14,7 +14,7 @@
 #include <Wire.h>
 
 #include "Sensors.h"
-#include "Reciever.h"
+#include "Receiver.h"
 #include "PIDs.h"
 #include "GPS.h"
 #include "Utils.h"
@@ -84,7 +84,7 @@ void loop() {
         yaw_target = yawDegrees;
       }
 
-      //calc stab pids
+      //calc rate pids
       computeRatePids(deltaTime);
 
       ESCManager::setInput(pitch_output, roll_output, yaw_output, Receiver::throttleIn); //should actually feed values in % (pyr -100 - 100, throttle 0-100)
@@ -140,5 +140,8 @@ inline void do10HZ(float dt) {
   #endif
   #if PRINT_SENSOR_DATA     
     print_sensor_data();
+  #endif
+  #if PRINT_RECEIVER_CHANNELS
+    print_receiver_channels();
   #endif
 }

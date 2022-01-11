@@ -1,5 +1,5 @@
-#ifndef RECIEVER_H
-#define RECIEVER_H
+#ifndef RECEIVER_H
+#define RECEIVER_H
 
 #include "Utils.h"
 #include "Config.h"
@@ -151,10 +151,10 @@ namespace Receiver {
           interrupts();
       }
   
-      rollIn = map(rollInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
-      pitchIn = -map(pitchInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX, -45, 45);
-      throttleIn = Utils::toDecimalPercent(throttleInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX);
-      yawIn = -map(yawInRaw, RCRECIEVER_MIN, RCRECIEVER_MAX, -135, 135); 
+      rollIn = map(rollInRaw, RCRECEIVER_MIN, RCRECEIVER_MAX, -45, 45);
+      pitchIn = -map(pitchInRaw, RCRECEIVER_MIN, RCRECEIVER_MAX, -45, 45);
+      throttleIn = Utils::toDecimalPercent(throttleInRaw, RCRECEIVER_MIN, RCRECEIVER_MAX);
+      yawIn = -map(yawInRaw, RCRECEIVER_MIN, RCRECEIVER_MAX, -135, 135); 
   }
 }
 #endif
