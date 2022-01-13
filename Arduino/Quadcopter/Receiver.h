@@ -23,7 +23,6 @@
 
 namespace Receiver {
   
-  //FAILSAFE var
   boolean failsafe;
   
   //holds time of last received transmission
@@ -39,72 +38,123 @@ namespace Receiver {
   float yawIn = 0;
   
   //RCinput signal length in micros
-  uint16_t pitchInRaw;
-  uint16_t yawInRaw;
-  uint16_t rollInRaw;
-  uint16_t throttleInRaw;
+  uint16_t channel1Raw;
+  uint16_t channel2Raw;
+  uint16_t channel3Raw;
+  uint16_t channel4Raw;
+  uint16_t channel5Raw;
+  uint16_t channel6Raw;
+  uint16_t channel7Raw;
+  uint16_t channel8Raw;
   
   //shared variables are updated by the ISR and ONLY read by the loop. Length of signal in micros.
   //Add for all channels!!!
-  volatile uint16_t pitchInShared;
-  volatile uint16_t yawInShared;
-  volatile uint16_t rollInShared;
-  volatile uint16_t throttleInShared;
+  volatile uint16_t channel1Shared;
+  volatile uint16_t channel2Shared;
+  volatile uint16_t channel3Shared;
+  volatile uint16_t channel4Shared;
+  volatile uint16_t channel5Shared;
+  volatile uint16_t channel6Shared;
+  volatile uint16_t channel7Shared;
+  volatile uint16_t channel8Shared;
   
   //holds time for the different channels signals
-  uint32_t pitchStart;
-  uint32_t yawStart;
-  uint32_t rollStart;
-  uint32_t throttleStart;
+  uint32_t channel1Start;
+  uint32_t channel2Start;
+  uint32_t channel3Start;
+  uint32_t channel4Start;
+  uint32_t channel5Start;
+  uint32_t channel6Start;
+  uint32_t channel7Start;
+  uint32_t channel8Start;
   
   //---------------------------------------------------
   //--------------INTERUPT HANDLERS--------------------
   //---------------------------------------------------
   void calcChannel1(){
-      if(digitalRead(CHANNEL1_INPUT_PIN) == HIGH){ //start of signal
-          rollStart = micros();
+      if(digitalReadFast(CHANNEL1_INPUT_PIN) == HIGH){ //start of signal
+          channel1Start = micros();
       }else{ //signal ended. Save signal and set flag
-          rollInShared = (uint16_t)(micros() - rollStart);
+          channel1Shared = (uint16_t)(micros() - channel1Start);
           channelFlagsShared |= CHANNEL1_FLAG;
       }
   }
   void calcChannel2(){
-      if(digitalRead(CHANNEL2_INPUT_PIN) == HIGH){ //start of signal
-          pitchStart = micros();
+      if(digitalReadFast(CHANNEL2_INPUT_PIN) == HIGH){ //start of signal
+          channel2Start = micros();
       }else{ //signal ended. Save signal and set flag
-          pitchInShared = (uint16_t)(micros() - pitchStart);
+          channel2Shared = (uint16_t)(micros() - channel2Start);
           channelFlagsShared |= CHANNEL2_FLAG;
       }
   }
   void calcChannel3(){
-      if(digitalRead(CHANNEL3_INPUT_PIN) == HIGH){ //start of signal
-          throttleStart = micros();
+      if(digitalReadFast(CHANNEL3_INPUT_PIN) == HIGH){ //start of signal
+          channel3Start = micros();
       }else{ //signal ended. Save signal and set flag
-          throttleInShared = (uint16_t)(micros() - throttleStart);
+          channel3Shared = (uint16_t)(micros() - channel3Start);
           channelFlagsShared |= CHANNEL3_FLAG;
       }
-      timeOfLastTransmission = micros(); // This channel keeps track of last received transmission
   }
   void calcChannel4(){
-      if(digitalRead(CHANNEL4_INPUT_PIN) == HIGH){ //start of signal
-          yawStart = micros();
+      if(digitalReadFast(CHANNEL4_INPUT_PIN) == HIGH){ //start of signal
+          channel4Start = micros();
       }else{ //signal ended. Save signal and set flag
-          yawInShared = (uint16_t)(micros() - yawStart);
+          channel4Shared = (uint16_t)(micros() - channel4Start);
           channelFlagsShared |= CHANNEL4_FLAG;
       }
   }
-  
+  void calcChannel5(){
+      if(digitalReadFast(CHANNEL5_INPUT_PIN) == HIGH){ //start of signal
+          channel5Start = micros();
+      }else{ //signal ended. Save signal and set flag
+          channel5Shared = (uint16_t)(micros() - channel5Start);
+          channelFlagsShared |= CHANNEL5_FLAG;
+      }
+  }
+  void calcChannel6(){
+      if(digitalReadFast(CHANNEL6_INPUT_PIN) == HIGH){ //start of signal
+          channel6Start = micros();
+      }else{ //signal ended. Save signal and set flag
+          channel6Shared = (uint16_t)(micros() - channel6Start);
+          channelFlagsShared |= CHANNEL6_FLAG;
+      }
+  }
+  void calcChannel7(){
+      if(digitalReadFast(CHANNEL7_INPUT_PIN) == HIGH){ //start of signal
+          channel7Start = micros();
+      }else{ //signal ended. Save signal and set flag
+          channel7Shared = (uint16_t)(micros() - channel7Start);
+          channelFlagsShared |= CHANNEL7_FLAG;
+      }
+  }
+  void calcChannel8(){
+      if(digitalReadFast(CHANNEL8_INPUT_PIN) == HIGH){ //start of signal
+          channel8Start = micros();
+      }else{ //signal ended. Save signal and set flag
+          channel8Shared = (uint16_t)(micros() - channel8Start);
+          channelFlagsShared |= CHANNEL8_FLAG;
+      }
+  }
+
   void initialize() {
+    pinMode(CHANNEL1_INPUT_PIN, INPUT_PULLUP);
+    pinMode(CHANNEL2_INPUT_PIN, INPUT_PULLUP);
+    pinMode(CHANNEL3_INPUT_PIN, INPUT_PULLUP);
+    pinMode(CHANNEL4_INPUT_PIN, INPUT_PULLUP);
+    pinMode(CHANNEL5_INPUT_PIN, INPUT_PULLUP);
+    pinMode(CHANNEL6_INPUT_PIN, INPUT_PULLUP);
+    pinMode(CHANNEL7_INPUT_PIN, INPUT_PULLUP);
+    pinMode(CHANNEL8_INPUT_PIN, INPUT_PULLUP);
     #if defined(Teensy_3_6) || defined(Teensy_4_0)
       attachInterrupt(CHANNEL1_INPUT_PIN, calcChannel1, CHANGE);
       attachInterrupt(CHANNEL2_INPUT_PIN, calcChannel2, CHANGE);
       attachInterrupt(CHANNEL3_INPUT_PIN, calcChannel3, CHANGE);
       attachInterrupt(CHANNEL4_INPUT_PIN, calcChannel4, CHANGE);
+      attachInterrupt(CHANNEL5_INPUT_PIN, calcChannel5, CHANGE);
+      attachInterrupt(CHANNEL6_INPUT_PIN, calcChannel6, CHANGE);
+      attachInterrupt(CHANNEL7_INPUT_PIN, calcChannel7, CHANGE);
+      attachInterrupt(CHANNEL8_INPUT_PIN, calcChannel8, CHANGE);
     #else
-      pinMode(CHANNEL1_INPUT_PIN, INPUT_PULLUP);
-      pinMode(CHANNEL2_INPUT_PIN, INPUT_PULLUP);
-      pinMode(CHANNEL3_INPUT_PIN, INPUT_PULLUP);
-      pinMode(CHANNEL4_INPUT_PIN, INPUT_PULLUP);
       enableInterrupt(CHANNEL1_INPUT_PIN, calcChannel1, CHANGE);
       enableInterrupt(CHANNEL2_INPUT_PIN, calcChannel2, CHANGE);
       enableInterrupt(CHANNEL3_INPUT_PIN, calcChannel3, CHANGE);
@@ -127,34 +177,46 @@ namespace Receiver {
       }else{ 
         failsafe = false;
       }
+      failsafe=false;
       
       if(channelFlagsShared && !failsafe){ //handle interupted pins
-          noInterrupts();
-  
-          //copy changed shared variables
-          channelFlags = channelFlagsShared;
-  
-          if(channelFlags & CHANNEL1_FLAG){
-              rollInRaw = rollInShared;
-          }
-          if(channelFlags & CHANNEL2_FLAG){
-              pitchInRaw = pitchInShared;
-          }
-          if(channelFlags & CHANNEL3_FLAG){
-              throttleInRaw = throttleInShared;
-          }
-          if(channelFlags & CHANNEL4_FLAG){
-              yawInRaw = yawInShared;
-          }
-          channelFlagsShared = 0;
-  
-          interrupts();
+        noInterrupts();
+
+        //copy changed shared variables
+        channelFlags = channelFlagsShared;
+
+        if(channelFlags & CHANNEL1_FLAG){
+            channel1Raw = channel1Shared;
+        }
+        if(channelFlags & CHANNEL2_FLAG){
+            channel2Raw = channel2Shared;
+        }
+        if(channelFlags & CHANNEL3_FLAG){
+            channel3Raw = channel3Shared;
+        }
+        if(channelFlags & CHANNEL4_FLAG){
+            channel4Raw = channel4Shared;
+        }
+        if(channelFlags & CHANNEL5_FLAG){
+            channel5Raw = channel5Shared;
+        }
+        if(channelFlags & CHANNEL6_FLAG){
+            channel6Raw = channel6Shared;
+        }
+        if(channelFlags & CHANNEL7_FLAG){
+            channel7Raw = channel7Shared;
+        }
+        if(channelFlags & CHANNEL8_FLAG){
+            channel8Raw = channel8Shared;
+        }
+
+        channelFlagsShared = 0;
+        interrupts();
       }
-  
-      rollIn = map(rollInRaw, RCRECEIVER_MIN, RCRECEIVER_MAX, -45, 45);
-      pitchIn = -map(pitchInRaw, RCRECEIVER_MIN, RCRECEIVER_MAX, -45, 45);
-      throttleIn = Utils::toDecimalPercent(throttleInRaw, RCRECEIVER_MIN, RCRECEIVER_MAX);
-      yawIn = -map(yawInRaw, RCRECEIVER_MIN, RCRECEIVER_MAX, -135, 135); 
+      rollIn = map(channel1Raw, RCRECEIVER_MIN, RCRECEIVER_MAX, -45, 45);
+      pitchIn = -map(channel2Raw, RCRECEIVER_MIN, RCRECEIVER_MAX, -45, 45);
+      throttleIn = Utils::toDecimalPercent(channel4Raw, RCRECEIVER_MIN, RCRECEIVER_MAX);
+      yawIn = -map(channel3Raw, RCRECEIVER_MIN, RCRECEIVER_MAX, -135, 135); 
   }
 }
 #endif

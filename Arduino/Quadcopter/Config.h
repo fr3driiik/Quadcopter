@@ -29,7 +29,7 @@
   #define CHANNEL1_INPUT_PIN A0 //roll
   #define CHANNEL2_INPUT_PIN A1 //pitch
   #define CHANNEL3_INPUT_PIN A2 //throttle
-  #define CHANNEL4_INPUT_PIN A3//yaw
+  #define CHANNEL4_INPUT_PIN A3 //yaw
   #define CHANNEL5_INPUT_PIN A4
   #define CHANNEL6_INPUT_PIN A5
   #define CHANNEL7_INPUT_PIN A6
@@ -44,19 +44,19 @@
   #define CHANNEL7_INPUT_PIN A9
   #define CHANNEL8_INPUT_PIN A8
 #elif defined(Teensy_3_6)
-  #define CHANNEL1_INPUT_PIN A15 //roll
-  #define CHANNEL2_INPUT_PIN A14 //pitch
-  #define CHANNEL3_INPUT_PIN A13 //throttle
-  #define CHANNEL4_INPUT_PIN A12 //yaw
-  #define CHANNEL5_INPUT_PIN A11
-  #define CHANNEL6_INPUT_PIN A10
-  #define CHANNEL7_INPUT_PIN A9
-  #define CHANNEL8_INPUT_PIN A8
+  #define CHANNEL1_INPUT_PIN 1
+  #define CHANNEL2_INPUT_PIN 2 
+  #define CHANNEL3_INPUT_PIN 3
+  #define CHANNEL4_INPUT_PIN 4
+  #define CHANNEL5_INPUT_PIN 5
+  #define CHANNEL6_INPUT_PIN 6
+  #define CHANNEL7_INPUT_PIN 7
+  #define CHANNEL8_INPUT_PIN 8
 #elif defined(Teensy_4_0)
-  #define CHANNEL1_INPUT_PIN 1 //roll
-  #define CHANNEL2_INPUT_PIN 2 //pitch
-  #define CHANNEL3_INPUT_PIN 3 //throttle
-  #define CHANNEL4_INPUT_PIN 4 //yaw
+  #define CHANNEL1_INPUT_PIN 1
+  #define CHANNEL2_INPUT_PIN 2
+  #define CHANNEL3_INPUT_PIN 3
+  #define CHANNEL4_INPUT_PIN 4
   #define CHANNEL5_INPUT_PIN 5
   #define CHANNEL6_INPUT_PIN 6
   #define CHANNEL7_INPUT_PIN 7
@@ -81,17 +81,17 @@
   };
 #elif defined(Teensy_3_6)
   const ESC escs[] = {
-    {3, -1.0, -1.0, -1.0}, //FR
-    {5, 1.0, 1.0, -1.0},   //RR
-    {6, 1.0, -1.0, 1.0},   //RL
-    {9, -1.0, 1.0, 1.0}    //FL
+    {14, -1.0, -1.0, -1.0}, //FR
+    {15, 1.0, 1.0, -1.0},   //RR
+    {16, 1.0, -1.0, 1.0},   //RL
+    {17, -1.0, 1.0, 1.0}    //FL
   };
 #elif defined(Teensy_4_0)
   const ESC escs[] = {
-    {3, -1.0, -1.0, -1.0}, //FR
-    {5, 1.0, 1.0, -1.0},   //RR
-    {6, 1.0, -1.0, 1.0},   //RL
-    {9, -1.0, 1.0, 1.0}    //FL
+    {14, -1.0, -1.0, -1.0}, //FR
+    {15, 1.0, 1.0, -1.0},   //RR
+    {16, 1.0, -1.0, 1.0},   //RL
+    {17, -1.0, 1.0, 1.0}    //FL
   };
 #endif
 

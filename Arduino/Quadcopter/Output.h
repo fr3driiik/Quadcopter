@@ -46,6 +46,12 @@ void print_receiver_channels() {
   Serial.println(stringStart + "channelThrottle:" + Receiver::throttleIn + "channelRoll:" + Receiver::rollIn + ", channelPitch:" + Receiver::pitchIn + ", channelYaw:" + Receiver::yawIn);
 }
 
+void print_receiver_channels_raw() {
+  String stringStart = "";
+  Serial.print(stringStart + "ch1:" + Receiver::channel1Raw + ", ch2:" + Receiver::channel2Raw + ", ch3:" + Receiver::channel3Raw + ", ch4:" + Receiver::channel4Raw);
+  Serial.println(stringStart + ", ch5:" + Receiver::channel5Raw + ", ch6:" + Receiver::channel6Raw + ", ch7:" + Receiver::channel7Raw + ", ch8:" + Receiver::channel8Raw);
+}
+
 void print_gps() {
   GPS::NAV_PVT pvt = GPS::getGPSMessage();
   Serial.print("ITOW: "); Serial.print(pvt.iTOW);

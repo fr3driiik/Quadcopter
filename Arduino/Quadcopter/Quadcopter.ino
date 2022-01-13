@@ -28,7 +28,9 @@
 #define OUTPUT__BAUD_RATE 115200
 #define DEBUG_OUTPUT false
 #define PRINT_SENSOR_DATA false
-#define PRINT_PYR_DATA true
+#define PRINT_PYR_DATA false
+#define PRINT_RECEIVER_CHANNELS false
+#define PRINT_RECEIVER_CHANNELS_RAW true
 #define PRINT_STATE false
 #define PRINT_GPS_DATA false
 #define PRINT_LOOP_TIME false
@@ -44,7 +46,9 @@ void setup() {
     Wire.begin();
     Wire.setClock(I2C_SPEED);
     Sensors::initialize();
-    GPS::initialize();
+    #ifdef GPS
+      GPS::initialize();
+    #endif
     Receiver::initialize();
     ESCManager::initialize();
     setRatePidsIntegralLimits(-40, 40); //direct engine influence
@@ -67,7 +71,7 @@ void loop() {
     }
 
     float dt10HZ = (micros() - timer10HZ) / 1000000.0000f;
-    if (dt10HZ >= 0.1f) {
+    if (dt10HZ >= 0.01f) {
       timer10HZ = micros();
       do10HZ(dt10HZ);
     }
@@ -90,9 +94,9 @@ void loop() {
       ESCManager::setInput(pitch_output, roll_output, yaw_output, Receiver::throttleIn); //should actually feed values in % (pyr -100 - 100, throttle 0-100)
     } else { //too low throttle
       ESCManager::tooLowThrottle();
-      if (DEBUG_OUTPUT) {
+      #if DEBUG_OUTPUT
         Serial.print("Engines off");
-      }
+      #endif
 
       //reset yaw
       yaw_target = yawDegrees;
@@ -130,11 +134,13 @@ inline void do1HZ(float dt) {
 }
 
 inline void do10HZ(float dt) {
-  if (GPS::read()) {
-    #if PRINT_GPS_DATA
-      print_gps();
-    #endif
-  }
+  #ifdef GPS
+    if (GPS::read()) {
+      #if PRINT_GPS_DATA
+        print_gps();
+      #endif
+    }
+  #endif
   #if PRINT_PYR_DATA
     print_pyr();
   #endif
@@ -143,5 +149,8 @@ inline void do10HZ(float dt) {
   #endif
   #if PRINT_RECEIVER_CHANNELS
     print_receiver_channels();
+  #endif
+  #if PRINT_RECEIVER_CHANNELS_RAW
+    print_receiver_channels_raw();
   #endif
 }

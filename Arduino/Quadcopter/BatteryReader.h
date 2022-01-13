@@ -5,7 +5,7 @@
 
 float readBattery() {
   #if BOARD_VOLTAGE * VOLTAGE_DIVIDER >= VOLTAGE_MAX
-    int raw = analogRead(BATTERY_PIN);
+    //int raw = analogRead(BATTERY_PIN);
     return map(raw, 0, 1023, 0, BOARD_VOLTAGE * VOLTAGE_DIVIDER);
   #else
     return -1.0; //should be avoided..
@@ -13,4 +13,3 @@ float readBattery() {
 }
 
 #endif
-

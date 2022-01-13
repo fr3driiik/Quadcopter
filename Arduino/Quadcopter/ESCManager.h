@@ -20,7 +20,7 @@
  * max = 232,407 analogWrite Value. Detta ger endast 100 steg, har mÃ¶jlighet fÃ¥r 800st
  * Steps: 100 -> one step = 8 steps for esc. Losing much precision! (TODO: fix with pwm timers?)
  * 
- * TEENSY 3.6
+ * TEENSY 3.6, 4.0
  * 500Hz -> pulseLength = 2000 Âµs
  * 12 bit res -> 4096 steps, each step = 0.48828125 Âµs
  * min = 2170.88 ( 2170.88 * stepLength = 1060)
