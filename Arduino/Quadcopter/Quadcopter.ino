@@ -49,9 +49,6 @@ void setup() {
       GPS::initialize();
     #endif
     Receiver::initialize();
-    ESCManager::initialize();
-    setRatePidsIntegralLimits(-40, 40); //direct engine influence
-    setStablePidsIntegralLimits(-202.5, 202.5); //max degrees per second to get right degree
     Serial.println("Ready for takeoff!");
     wdt_enable(WDTO_500MS);  // watchdog timer
     timer = micros();
