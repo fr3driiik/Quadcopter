@@ -15,11 +15,10 @@
 
 #include "Sensors.h"
 #include "Receiver.h"
-#include "PIDs.h"
 #include "GPS.h"
 #include "Utils.h"
 #include "Output.h"
-#include "ESCManager.h"
+#include "Control.h"
 
 #define I2C_SPEED 400000 //400kHz = fast mode
 #define DESIRED_HZ 500 //2ms
@@ -77,51 +76,16 @@ void loop() {
     }
     
     IMU::update(deltaTime);
-
-    if(Receiver::throttleIn > 0.05){ //calc PIDS and run engines accordingly
-      //calc stab pids
-      computeStabPids(deltaTime);
-
-      //yaw change desired? overwrite stab output and yaw target
-      if(abs(Receiver::yawIn) > 0.05){
-        yaw_stab_output = Utils::fromDecimalPercent(Receiver::yawIn, -YAW_MAX_DPS, YAW_MAX_DPS);
-        yaw_target = yawDegrees;
-      }
-
-      //calc rate pids
-      computeRatePids(deltaTime);
-
-      ESCManager::setInput(pitch_output, roll_output, yaw_output, Receiver::throttleIn); //should actually feed values in % (pyr -100 - 100, throttle 0-100)
-    } else { //too low throttle
-      ESCManager::tooLowThrottle();
-      #if DEBUG_OUTPUT
-        Serial.print("Engines off");
-      #endif
-
-      //reset yaw
-      yaw_target = yawDegrees;
-
-      //reset pids
-      resetPids();
-    }
+    Control::update(deltaTime);
 
     //stable hz, wait for desired time
-    bool loopTimeExceded = true;
-    #if PRINT_LOOP_TIME
-      Serial.print("w8:");Serial.print(AVAIL_LOOP_TIME - (micros() - timer));Serial.println();
-    #endif
-    while(true){
-      long timePassed = micros() - timer;
-      if (timePassed >= AVAIL_LOOP_TIME){
-        break;
-      } else {
-        loopTimeExceded = false;
-      }
+    long timeLeft = AVAIL_LOOP_TIME - (micros() - timer);
+    if (timeLeft >= 0) {
+      delayMicroseconds(timeLeft);
     }
     #if PRINT_LOOP_TIME
-      if (loopTimeExceded) {
-        Serial.println("Loop time exceeded");
-      }
+      String stringStart = "";
+      Serial.println(stringStart + "loopTimeLeft:" + timeLeft);
     #endif
 
     wdt_reset(); //we are still alive  

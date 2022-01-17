@@ -25,6 +25,7 @@
 #define RCRECEIVER_MIN 1050
 #define RCRECEIVER_MAX 1880
 #define FAILSAFE_DELAY 300000 // after 0,3 seconds of no signal on choosen channel, in this case ch3 because ch 4 is receiveing last value..
+#define FAILSAFE_CHANNEL 3
 #ifdef Arduino_Pro_Micro
   #define CHANNEL1_INPUT_PIN A0 //roll
   #define CHANNEL2_INPUT_PIN A1 //pitch

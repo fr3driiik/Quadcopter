@@ -48,8 +48,8 @@ void print_receiver_channels() {
 
 void print_receiver_channels_raw() {
   String stringStart = "";
-  Serial.print(stringStart + "ch1:" + Receiver::channel1Raw + ", ch2:" + Receiver::channel2Raw + ", ch3:" + Receiver::channel3Raw + ", ch4:" + Receiver::channel4Raw);
-  Serial.println(stringStart + ", ch5:" + Receiver::channel5Raw + ", ch6:" + Receiver::channel6Raw + ", ch7:" + Receiver::channel7Raw + ", ch8:" + Receiver::channel8Raw);
+  Serial.print(stringStart + "ch1:" + Receiver::channelsRaw[0] + ", ch2:" + Receiver::channelsRaw[1] + ", ch3:" + Receiver::channelsRaw[2] + ", ch4:" + Receiver::channelsRaw[3]);
+  Serial.println(stringStart + ", ch5:" + Receiver::channelsRaw[4] + ", ch6:" + Receiver::channelsRaw[5] + ", ch7:" + Receiver::channelsRaw[6] + ", ch8:" + Receiver::channelsRaw[7] + ", failsafe:" + (int)Receiver::failsafe);
 }
 
 void print_gps() {
