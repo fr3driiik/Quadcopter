@@ -14,10 +14,12 @@
 #include <Wire.h>
 
 #include "Sensors.h"
+#include "IMU.h"
 #include "Receiver.h"
 #include "GPS.h"
 #include "Utils.h"
 #include "Output.h"
+#include "Navigation.h"
 #include "Control.h"
 
 #define I2C_SPEED 400000 //400kHz = fast mode
@@ -27,9 +29,8 @@
 #define OUTPUT__BAUD_RATE 115200
 #define DEBUG_OUTPUT false
 #define PRINT_SENSOR_DATA false
-#define PRINT_PYR_DATA false
+#define PRINT_PYR_DATA true
 #define PRINT_RECEIVER_CHANNELS false
-#define PRINT_RECEIVER_CHANNELS_RAW true
 #define PRINT_STATE false
 #define PRINT_GPS_DATA false
 #define PRINT_LOOP_TIME false
@@ -73,6 +74,7 @@ void loop() {
     }
     
     IMU::update(deltaTime);
+    Navigation::update(deltaTime);
     Control::update(deltaTime);
 
     //stable hz, wait for desired time
@@ -109,9 +111,6 @@ inline void do10HZ(float dt) {
     print_sensor_data();
   #endif
   #if PRINT_RECEIVER_CHANNELS
-    print_receiver_channels();
-  #endif
-  #if PRINT_RECEIVER_CHANNELS_RAW
     print_receiver_channels_raw();
   #endif
 }

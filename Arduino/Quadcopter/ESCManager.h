@@ -46,7 +46,7 @@ namespace ESCManager {
   void setInput(float pitch, float roll, float yaw, float throttle);
   void armAll();
   void disarmAll();
-  void tooLowThrottle();
+  void stop();
 }
 
 #endif

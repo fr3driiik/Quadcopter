@@ -22,7 +22,7 @@ namespace IMU {
     float height;
   };
   
-  State getState();
+  extern State state;
   void update(float dt);
   void updateGPS(float dt); //only if gps is enabled
 }

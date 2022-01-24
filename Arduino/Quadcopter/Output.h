@@ -6,31 +6,27 @@
 #include "GPS.h"
 
 void print_sensor_data(){
-  Serial.print("SENSORS[x:y:z]");
-  Serial.print("  Gyro[");
-  Serial.print(Sensors::gyro[0], 2);Serial.print(" : ");
-  Serial.print(Sensors::gyro[1], 2);Serial.print(" : ");
-  Serial.print(Sensors::gyro[2], 2);Serial.print("]");
-  Serial.print("  Accel[");
-  Serial.print(Sensors::accel[0], 2);Serial.print(" : ");
-  Serial.print(Sensors::accel[1], 2);Serial.print(" : ");
-  Serial.print(Sensors::accel[2], 2);Serial.print("]");
-  Serial.print("  Magneto[");
-  Serial.print(Sensors::magnetom[0], 2);Serial.print(" : ");
-  Serial.print(Sensors::magnetom[1], 2);Serial.print(" : ");
-  Serial.print(Sensors::magnetom[2], 2);Serial.print("]");
-  Serial.print("  Temperature: ");Serial.print(Sensors::temperature, 2);
+  Serial.print(  "GyroX: ");Serial.print(Sensors::gyro[0], 2);
+  Serial.print(", GyroY: ");Serial.print(Sensors::gyro[1], 2);
+  Serial.print(", GyroZ: ");Serial.print(Sensors::gyro[2], 2);
+  Serial.print(", AccelX: ");Serial.print(Sensors::accel[0], 2);
+  Serial.print(", AccelY: ");Serial.print(Sensors::accel[1], 2);
+  Serial.print(", AccelZ: ");Serial.print(Sensors::accel[2], 2);
+  Serial.print(", MagnetoX: ");Serial.print(Sensors::magnetom[0], 2);
+  Serial.print(", MagnetoY: ");Serial.print(Sensors::magnetom[1], 2);
+  Serial.print(", MagentoZ: ");Serial.print(Sensors::magnetom[2], 2);
+  Serial.print(", Temperature: ");Serial.print(Sensors::temperature, 2);
   Serial.println();
 }
 
 void print_pyr() {
-  IMU::State s = IMU::getState();
+  IMU::State s = IMU::state;
   String stringStart = "";
   Serial.println(stringStart + "roll:" + s.rollDegrees + ", pitch:" + s.pitchDegrees + ", yaw:" + s.yawDegrees);
 }
 
 void print_state() {
-  IMU::State s = IMU::getState();
+  IMU::State s = IMU::state;
   String stringStart = "";
   //we dont print rotationMatrix, not understandable..
   Serial.println(stringStart + "Pitch: " + s.pitchDegrees + " Yaw: " + s.yawDegrees + " Roll: " + s.rollDegrees);
@@ -42,11 +38,6 @@ void print_state() {
 }
 
 void print_receiver_channels() {
-  String stringStart = "";
-  Serial.println(stringStart + "channelThrottle:" + Receiver::throttleIn + "channelRoll:" + Receiver::rollIn + ", channelPitch:" + Receiver::pitchIn + ", channelYaw:" + Receiver::yawIn);
-}
-
-void print_receiver_channels_raw() {
   String stringStart = "";
   Serial.print(stringStart + "ch1:" + Receiver::channelsRaw[0] + ", ch2:" + Receiver::channelsRaw[1] + ", ch3:" + Receiver::channelsRaw[2] + ", ch4:" + Receiver::channelsRaw[3]);
   Serial.println(stringStart + ", ch5:" + Receiver::channelsRaw[4] + ", ch6:" + Receiver::channelsRaw[5] + ", ch7:" + Receiver::channelsRaw[6] + ", ch8:" + Receiver::channelsRaw[7] + ", failsafe:" + (int)Receiver::failsafe);

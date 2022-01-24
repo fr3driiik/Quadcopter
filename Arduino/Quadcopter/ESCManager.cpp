@@ -16,8 +16,8 @@ void ESCManager::setInput(float pitch, float roll, float yaw, float throttle) {
   for (int i = 0; i < ESC_COUNT; i++){
     ESC esc = escs[i];
     float speed = throttle + pitch * esc.pitchInfluence + yaw * esc.yawInfluence + roll * esc.rollInfluence;
-    float pwmWidth = Utils::fromDecimalPercent(speed, ESC_MIN, ESC_MAX);
-    analogWrite(esc.escPin, constrain(pwmWidth, 0, ESC_MAX)); //we don't want to force arm-value
+    speed = constrain(speed, 0, ESC_MAX));  //we don't want to force arm-value
+    analogWrite(esc.escPin, speed);
   }
 }
    
@@ -33,7 +33,7 @@ void ESCManager::disarmAll() {
   }
 }
 
-void ESCManager::tooLowThrottle() {
+void ESCManager::stop() {
   for (int i = 0; i < ESC_COUNT; i++) {
     analogWrite(escs[i].escPin, ESC_MIN);
   }

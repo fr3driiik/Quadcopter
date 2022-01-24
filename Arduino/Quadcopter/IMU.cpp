@@ -1,10 +1,7 @@
 #include "IMU.h"
 
-IMU::State state;
 
-IMU::State IMU::getState() {
-  return state;
-}
+IMU::State IMU::state;
 
 void IMU::update(float dt) {
   #ifdef MAGNETOMETER

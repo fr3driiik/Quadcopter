@@ -19,11 +19,22 @@
 
 //Rotations
 #define ROLL_PITCH_MAX_ANGLE 45
+#define ROLL_PITCH_MAX_DPS 200
 #define YAW_MAX_DPS 135
 
+//PID
+#define PID_RATE_INTERGRAL_LIMIT 100
+#define PID_ANGLE_INTERGRAL_LIMIT 100
+
 //RECEIVER
+#define PITCH_CHANNEL 1
+#define ROLL_CHANNEL 2
+#define YAW_CHANNEL 3
+#define THROTTLE_CHANNEL 4
+#define MODE_CHANNEL 5
 #define RCRECEIVER_MIN 1050
 #define RCRECEIVER_MAX 1880
+
 #define FAILSAFE_DELAY 300000 // after 0,3 seconds of no signal on choosen channel, in this case ch3 because ch 4 is receiveing last value..
 #define FAILSAFE_CHANNEL 3
 #ifdef Arduino_Pro_Micro
@@ -54,14 +65,14 @@
   #define CHANNEL7_INPUT_PIN 7
   #define CHANNEL8_INPUT_PIN 8
 #elif defined(Teensy_4_0)
-  #define CHANNEL1_INPUT_PIN 1
-  #define CHANNEL2_INPUT_PIN 2
-  #define CHANNEL3_INPUT_PIN 3
-  #define CHANNEL4_INPUT_PIN 4
-  #define CHANNEL5_INPUT_PIN 5
-  #define CHANNEL6_INPUT_PIN 6
-  #define CHANNEL7_INPUT_PIN 7
-  #define CHANNEL8_INPUT_PIN 8
+  #define CHANNEL1_INPUT_PIN 0
+  #define CHANNEL2_INPUT_PIN 1
+  #define CHANNEL3_INPUT_PIN 2
+  #define CHANNEL4_INPUT_PIN 3
+  #define CHANNEL5_INPUT_PIN 4
+  #define CHANNEL6_INPUT_PIN 5
+  #define CHANNEL7_INPUT_PIN 6
+  #define CHANNEL8_INPUT_PIN 7
 #endif
 
 //ESC

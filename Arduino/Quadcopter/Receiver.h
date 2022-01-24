@@ -34,13 +34,7 @@ namespace Receiver {
   
   //keeper of the flags above, max 8 channels because 8bits
   volatile uint8_t channelFlagsShared;
-  
-  //RCinput signal length in %
-  float rollIn = 0;
-  float pitchIn = 0;
-  float throttleIn = 0;
-  float yawIn = 0;
-  
+    
   //RCinput signal length in micros
   uint16_t channelsRaw[8];
   
@@ -90,12 +84,7 @@ namespace Receiver {
       static uint8_t channelFlags;
       uint32_t timeOfLastTransmission = channelsStart[FAILSAFE_CHANNEL-1];
       if(timeOfLastTransmission == 0 || (micros() - timeOfLastTransmission) > FAILSAFE_DELAY){ //transmitter not connected
-          failsafe = true;
-  
-          //make stable
-          rollIn = 0; 
-          pitchIn = 0;
-          throttleIn = 0; //engine shutoff, maybe set to 20-30%?
+        failsafe = true;
       }else{ 
         failsafe = false;
       }
@@ -114,10 +103,6 @@ namespace Receiver {
         channelFlagsShared = 0;
         interrupts();
       }
-      rollIn = map(channelsRaw[0], RCRECEIVER_MIN, RCRECEIVER_MAX, -45, 45);
-      pitchIn = -map(channelsRaw[1], RCRECEIVER_MIN, RCRECEIVER_MAX, -45, 45);
-      throttleIn = Utils::toDecimalPercent(channelsRaw[3], RCRECEIVER_MIN, RCRECEIVER_MAX);
-      yawIn = -map(channelsRaw[2], RCRECEIVER_MIN, RCRECEIVER_MAX, -135, 135); 
   }
 }
 #endif
