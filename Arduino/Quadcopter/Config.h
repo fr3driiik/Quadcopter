@@ -10,6 +10,9 @@
 //#define Teensy_3_6
 #define Teensy_4_0
 
+//Timings
+#define DESIRED_CONTROL_HZ 500
+
 //Sensors
 #define MAGNETOMETER
 #define EARTH_MAGNETIC_FIELD_STRENGTH 466.9  // mgauss
@@ -22,18 +25,36 @@
 #define ROLL_PITCH_MAX_DPS 200
 #define YAW_MAX_DPS 135
 
+//ESC
+#ifdef Arduino_Pro_Micro
+  #define ESC_MIN 132
+  #define ESC_MAX 232
+#elif defined(Arduino_Mega_2560)
+  #define ESC_MIN 132
+  #define ESC_MAX 232
+#elif defined(Teensy_3_6)
+  #define ESC_MIN 2170
+  #define ESC_MAX 3809
+#elif defined(Teensy_4_0)
+  #define ESC_MIN 2120
+  #define ESC_MAX 3809
+#endif
+
 //PID
+#define PID_RATE_OUTPUT_LIMIT 100
 #define PID_RATE_INTERGRAL_LIMIT 100
-#define PID_ANGLE_INTERGRAL_LIMIT 100
+#define PID_ANGLE_OUTPUT_LIMIT 100
 
 //RECEIVER
-#define PITCH_CHANNEL 1
-#define ROLL_CHANNEL 2
-#define YAW_CHANNEL 3
-#define THROTTLE_CHANNEL 4
+#define PITCH_CHANNEL 3
+#define ROLL_CHANNEL 1
+#define YAW_CHANNEL 4
+#define THROTTLE_CHANNEL 2
 #define MODE_CHANNEL 5
 #define RCRECEIVER_MIN 1050
 #define RCRECEIVER_MAX 1880
+#define THROTTLE_DEAD_BAND 50
+#define THROTTLE_CAP 2*PID_RATE_OUTPUT_LIMIT
 
 #define FAILSAFE_DELAY 300000 // after 0,3 seconds of no signal on choosen channel, in this case ch3 because ch 4 is receiveing last value..
 #define FAILSAFE_CHANNEL 3
@@ -100,10 +121,10 @@
   };
 #elif defined(Teensy_4_0)
   const ESC escs[] = {
-    {14, -1.0, -1.0, -1.0}, //FR
-    {15, 1.0, 1.0, -1.0},   //RR
-    {16, 1.0, -1.0, 1.0},   //RL
-    {17, -1.0, 1.0, 1.0}    //FL
+    {8, 1.0, -1.0, -1.0}, //FR
+    {9, -1.0, 1.0, -1.0},   //RR
+    {10, -1.0, -1.0, 1.0},   //RL
+    {11, 1.0, 1.0, 1.0}    //FL
   };
 #endif
 

@@ -29,7 +29,7 @@
 #define OUTPUT__BAUD_RATE 115200
 #define DEBUG_OUTPUT false
 #define PRINT_SENSOR_DATA false
-#define PRINT_PYR_DATA true
+#define PRINT_PYR_DATA false
 #define PRINT_RECEIVER_CHANNELS false
 #define PRINT_STATE false
 #define PRINT_GPS_DATA false
@@ -50,6 +50,7 @@ void setup() {
       GPS::initialize();
     #endif
     Receiver::initialize();
+    Control::initialize();
     Serial.println("Ready for takeoff!");
     wdt_enable(WDTO_500MS);  // watchdog timer
     timer = micros();
@@ -76,6 +77,7 @@ void loop() {
     IMU::update(deltaTime);
     Navigation::update(deltaTime);
     Control::update(deltaTime);
+    Serial.println();
 
     //stable hz, wait for desired time
     long timeLeft = AVAIL_LOOP_TIME - (micros() - timer);
@@ -111,6 +113,6 @@ inline void do10HZ(float dt) {
     print_sensor_data();
   #endif
   #if PRINT_RECEIVER_CHANNELS
-    print_receiver_channels_raw();
+    print_receiver_channels();
   #endif
 }

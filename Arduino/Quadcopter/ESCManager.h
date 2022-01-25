@@ -28,22 +28,9 @@
  * Steps: 1639 -> esc will only be able to detech two-steps
  */ 
 
-#ifdef Arduino_Pro_Micro
-  #define ESC_MIN 132
-  #define ESC_MAX 232
-#elif defined(Arduino_Mega_2560)
-  #define ESC_MIN 132
-  #define ESC_MAX 232
-#elif defined(Teensy_3_6)
-  #define ESC_MIN 2170
-  #define ESC_MAX 3809
-#elif defined(Teensy_4_0)
-  #define ESC_MIN 2170
-  #define ESC_MAX 3809
-#endif
 namespace ESCManager {
   void initialize();
-  void setInput(float pitch, float roll, float yaw, float throttle);
+  void set_input(float pitch, float roll, float yaw, float throttle);
   void armAll();
   void disarmAll();
   void stop();

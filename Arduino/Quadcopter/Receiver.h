@@ -79,6 +79,10 @@ namespace Receiver {
       enableInterrupt(CHANNEL4_INPUT_PIN, handle_channel_interrupt_4, CHANGE);
     #endif
   }
+
+  uint16_t inline get_channel_value(uint8_t channel) {
+    return channelsRaw[channel-1];
+  }
   
   void loop() {
       static uint8_t channelFlags;

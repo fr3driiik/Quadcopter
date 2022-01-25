@@ -15,60 +15,81 @@ namespace Control {
   };
   Mode mode = STOP;
 
-  float rate_out[3] = {0, 0, 0};
+  float rate_output[3] = {0, 0, 0};
   float rate_target[3] = {0, 0, 0};
-  float angle_input[3] = {0, 0, 0};
   float angle_target[3] = {0, 0, 0};
   float angle_output[3] = {0, 0, 0};
+  float throttle_input = 0;
   float angle_yaw_input = 0;  // angle yaw is actually a desired rate change. Not a target yaw in degrees.
   
-  PID rate_pitch(&IMU::state.pitchDegrees, &rate_target[PITCH], &rate_out[PITCH], 0.05, 0.1, 0.0, true);
-  PID rate_roll(&IMU::state.rollDegrees, &rate_target[ROLL], &rate_out[ROLL], 0.05, 0.1, 0.0, false);
-  PID rate_yaw(&IMU::state.yawDegrees, &rate_target[YAW], &rate_out[YAW], 0, 0.0, 0.0, false);
-  PID angle_pitch(&angle_input[PITCH], &angle_target[PITCH], &angle_output[PITCH], 0.05, 0.1, 0.0, true);
-  PID angle_roll(&angle_input[ROLL], &angle_target[ROLL], &angle_output[ROLL], 0.05, 0.1, 0.0, false);
-  PID angle_yaw(&angle_input[YAW], &angle_target[YAW], &angle_output[YAW], 0, 0.0, 0.0, false);
+  PID rate_pitch(&Sensors::gyro[PITCH], &rate_output[PITCH], &rate_target[PITCH], 0.5, 0.0, 0.0, DIRECT);
+  PID rate_roll(&Sensors::gyro[ROLL], &rate_output[ROLL], &rate_target[ROLL], 0.5, 0.0, 0.0, DIRECT);
+  PID rate_yaw(&Sensors::gyro[YAW], &rate_output[YAW], &rate_target[YAW], 0.5, 0.0, 0.0, DIRECT);
+  PID angle_pitch(&IMU::state.pitchDegrees, &angle_output[PITCH], &angle_target[PITCH], 4.5, 0.0, 0.0, DIRECT);
+  PID angle_roll(&IMU::state.rollDegrees, &angle_output[ROLL], &angle_target[ROLL], 4.5, 0.0, 0.0, DIRECT);
+  PID angle_yaw(&IMU::state.yawDegrees, &angle_output[YAW], &angle_target[YAW], 6, 0.0, 0.0, DIRECT);
 
   void initialize() {
-    //Rate limit
-    rate_pitch.setIntegralLimits(PID_RATE_INTERGRAL_LIMIT, PID_RATE_INTERGRAL_LIMIT);
-    rate_roll.setIntegralLimits(PID_RATE_INTERGRAL_LIMIT, PID_RATE_INTERGRAL_LIMIT);
-    rate_yaw.setIntegralLimits(PID_RATE_INTERGRAL_LIMIT, PID_RATE_INTERGRAL_LIMIT);
+    //Rate
+    rate_pitch.SetSampleTime(1000/DESIRED_CONTROL_HZ);
+    rate_roll.SetSampleTime(1000/DESIRED_CONTROL_HZ);
+    rate_yaw.SetSampleTime(1000/DESIRED_CONTROL_HZ);
+    rate_pitch.SetIntegralLimits(-PID_RATE_INTERGRAL_LIMIT, PID_RATE_INTERGRAL_LIMIT);
+    rate_roll.SetIntegralLimits(-PID_RATE_INTERGRAL_LIMIT, PID_RATE_INTERGRAL_LIMIT);
+    rate_yaw.SetIntegralLimits(-PID_RATE_INTERGRAL_LIMIT, PID_RATE_INTERGRAL_LIMIT);
+    rate_pitch.SetOutputLimits(-PID_RATE_OUTPUT_LIMIT, PID_RATE_OUTPUT_LIMIT);
+    rate_roll.SetOutputLimits(-PID_RATE_OUTPUT_LIMIT, PID_RATE_OUTPUT_LIMIT);
+    rate_yaw.SetOutputLimits(-PID_RATE_OUTPUT_LIMIT, PID_RATE_OUTPUT_LIMIT);
+    rate_pitch.SetMode(AUTOMATIC);
+    rate_roll.SetMode(AUTOMATIC);
+    rate_yaw.SetMode(AUTOMATIC);
 
-    //Stable limits
-    angle_pitch.setIntegralLimits(PID_ANGLE_INTERGRAL_LIMIT, PID_ANGLE_INTERGRAL_LIMIT);
-    angle_roll.setIntegralLimits(PID_ANGLE_INTERGRAL_LIMIT, PID_ANGLE_INTERGRAL_LIMIT);
-    angle_yaw.setIntegralLimits(PID_ANGLE_INTERGRAL_LIMIT, PID_ANGLE_INTERGRAL_LIMIT);
+    //Stable
+    angle_pitch.SetSampleTime(1000/DESIRED_CONTROL_HZ);
+    angle_roll.SetSampleTime(1000/DESIRED_CONTROL_HZ);
+    angle_yaw.SetSampleTime(1000/DESIRED_CONTROL_HZ);
+    angle_pitch.SetOutputLimits(-PID_ANGLE_OUTPUT_LIMIT, PID_ANGLE_OUTPUT_LIMIT);
+    angle_roll.SetOutputLimits(-PID_ANGLE_OUTPUT_LIMIT, PID_ANGLE_OUTPUT_LIMIT);
+    angle_yaw.SetOutputLimits(-PID_ANGLE_OUTPUT_LIMIT, PID_ANGLE_OUTPUT_LIMIT);
+    angle_pitch.SetMode(AUTOMATIC);
+    angle_roll.SetMode(AUTOMATIC);
+    angle_yaw.SetMode(AUTOMATIC);
+
 
     ESCManager::initialize();
   }
 
   void reset_rate_pids() {
-    rate_pitch.reset();
-    rate_roll.reset();
-    rate_yaw.reset();
+    rate_pitch.Reset();
+    rate_roll.Reset();
+    rate_yaw.Reset();
   }
 
   void reset_angle_pids() {
-    angle_pitch.reset();
-    angle_roll.reset();
-    angle_yaw.reset();
+    angle_pitch.Reset();
+    angle_roll.Reset();
+    angle_yaw.Reset();
   }
 
-  void calculate_rate_pids(float deltaTime) {
-    rate_pitch.calculate(deltaTime);
-    rate_roll.calculate(deltaTime);
-    rate_yaw.calculate(deltaTime);
+  void calculate_rate_pids() {
+    rate_pitch.Compute();
+    rate_roll.Compute();
+    rate_yaw.Compute();
   }
 
-  void calculate_angle_pids(float deltaTime) {
-    angle_pitch.calculate(deltaTime);
-    angle_roll.calculate(deltaTime);
-    angle_yaw.calculate(deltaTime);
+  void calculate_angle_pids() {
+    angle_pitch.Compute();
+    angle_roll.Compute();
+    angle_yaw.Compute();
   }
 
   void stop() {
     mode = STOP;
+    throttle_input = 0;
+  }
+
+  void set_throttle(float throttle) {
+    throttle_input = throttle;
   }
 
   void set_rate_target(float pitch_rate_target, float roll_rate_target, float yaw_rate_target) {
@@ -88,9 +109,9 @@ namespace Control {
   void update(float deltaTime) {
     switch(mode) {        
       case ANGULAR_RATE_CONTROL: {
-        calculate_rate_pids(deltaTime);
+        calculate_rate_pids();
         reset_angle_pids();
-        ESCManager::
+        ESCManager::set_input(rate_output[PITCH], rate_output[ROLL], rate_output[YAW], throttle_input);
         break;
       }
       case ANGLE_CONTROL: {
@@ -101,7 +122,7 @@ namespace Control {
         } else if (diffDegrees > 180) {
           angle_target[YAW] -= 360;
         }
-        calculate_angle_pids(deltaTime);
+        calculate_angle_pids();
         rate_target[PITCH] = angle_output[PITCH];
         rate_target[ROLL] = angle_output[ROLL];
 
@@ -114,7 +135,8 @@ namespace Control {
           rate_target[YAW] = angle_output[YAW];
         }
         
-        calculate_rate_pids(deltaTime);
+        calculate_rate_pids();
+        ESCManager::set_input(rate_output[PITCH], rate_output[ROLL], rate_output[YAW], throttle_input);
         break;
       }
       case STOP: {}
