@@ -16,6 +16,7 @@ void print_sensor_data(){
   Serial.print(", MagnetoY: ");Serial.print(Sensors::magnetom[1], 2);
   Serial.print(", MagentoZ: ");Serial.print(Sensors::magnetom[2], 2);
   Serial.print(", Temperature: ");Serial.print(Sensors::temperature, 2);
+  Serial.print(", Pressure: ");Serial.print(Sensors::pressure, 2);
   Serial.println();
 }
 
@@ -28,7 +29,6 @@ void print_pyr() {
 void print_state() {
   IMU::State s = IMU::state;
   String stringStart = "";
-  //we dont print rotationMatrix, not understandable..
   Serial.println(stringStart + "Pitch: " + s.pitchDegrees + " Yaw: " + s.yawDegrees + " Roll: " + s.rollDegrees);
   Serial.println(stringStart + "QX: " + s.qx + " QY: " + s.qy + " QZ: " + s.qz + " QW: " + s.qw);
   Serial.println(stringStart + "AccNorth: " + s.accNorth + " AccEast: " + s.accEast + " AccDown: " + s.accDown);
@@ -40,7 +40,8 @@ void print_state() {
 void print_receiver_channels() {
   String stringStart = "";
   Serial.print(stringStart + "ch1:" + Receiver::channelsRaw[0] + ", ch2:" + Receiver::channelsRaw[1] + ", ch3:" + Receiver::channelsRaw[2] + ", ch4:" + Receiver::channelsRaw[3]);
-  Serial.println(stringStart + ", ch5:" + Receiver::channelsRaw[4] + ", ch6:" + Receiver::channelsRaw[5] + ", ch7:" + Receiver::channelsRaw[6] + ", ch8:" + Receiver::channelsRaw[7] + ", failsafe:" + (int)Receiver::failsafe);
+  Serial.print(stringStart + ", ch5:" + Receiver::channelsRaw[4] + ", ch6:" + Receiver::channelsRaw[5] + ", ch7:" + Receiver::channelsRaw[6]);
+  Serial.println(stringStart + ", ch8:" + Receiver::channelsRaw[7] + ", failsafe:" + (int)Receiver::failsafe);
 }
 
 void print_gps() {

@@ -31,9 +31,9 @@ namespace Control {
 
   void initialize() {
     //Rate
-    rate_pitch.SetSampleTime(1000/DESIRED_CONTROL_HZ);
-    rate_roll.SetSampleTime(1000/DESIRED_CONTROL_HZ);
-    rate_yaw.SetSampleTime(1000/DESIRED_CONTROL_HZ);
+    rate_pitch.SetSampleTime(1000/DESIRED_LOOP_HZ);
+    rate_roll.SetSampleTime(1000/DESIRED_LOOP_HZ);
+    rate_yaw.SetSampleTime(1000/DESIRED_LOOP_HZ);
     rate_pitch.SetIntegralLimits(-PID_RATE_INTERGRAL_LIMIT, PID_RATE_INTERGRAL_LIMIT);
     rate_roll.SetIntegralLimits(-PID_RATE_INTERGRAL_LIMIT, PID_RATE_INTERGRAL_LIMIT);
     rate_yaw.SetIntegralLimits(-PID_RATE_INTERGRAL_LIMIT, PID_RATE_INTERGRAL_LIMIT);
@@ -45,9 +45,9 @@ namespace Control {
     rate_yaw.SetMode(AUTOMATIC);
 
     //Stable
-    angle_pitch.SetSampleTime(1000/DESIRED_CONTROL_HZ);
-    angle_roll.SetSampleTime(1000/DESIRED_CONTROL_HZ);
-    angle_yaw.SetSampleTime(1000/DESIRED_CONTROL_HZ);
+    angle_pitch.SetSampleTime(1000/DESIRED_LOOP_HZ);
+    angle_roll.SetSampleTime(1000/DESIRED_LOOP_HZ);
+    angle_yaw.SetSampleTime(1000/DESIRED_LOOP_HZ);
     angle_pitch.SetOutputLimits(-PID_ANGLE_OUTPUT_LIMIT, PID_ANGLE_OUTPUT_LIMIT);
     angle_roll.SetOutputLimits(-PID_ANGLE_OUTPUT_LIMIT, PID_ANGLE_OUTPUT_LIMIT);
     angle_yaw.SetOutputLimits(-PID_ANGLE_OUTPUT_LIMIT, PID_ANGLE_OUTPUT_LIMIT);

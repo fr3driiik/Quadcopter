@@ -11,22 +11,30 @@
 
 #define OUTPUT_ERRORS
 
+#ifdef ALTIMU_10_V5
+    // sensor chip that does not expose any interrupt pins
+    #define LSM6DS33  // gyro and accelerometer
+    #define LIS3MDL   // magnetometer
+    #define LPS25H    // barometer
+#endif
+#ifdef CSGSHOP_11_DOF
+    #define ITG3050   // gyro
+    #define HMC5883L  // magnetometer
+    #define BMA180    // accelerometer
+    #define MS5611    // barometer
+    #define NEO_M8N   // GPS
+#endif
+
+enum class Axis { X=0, Y=1, Z=2 };
+
 namespace Sensors {
-	extern float gyro[3];
-	extern float accel[3]; 
-	extern float magnetom[3]; 
-  extern float temperature;
+    extern float gyro[3];      // degrees/second
+    extern float accel[3];     // g force
+    extern float magnetom[3];  // gauss
+    extern float temperature;  // Celsius (°C)
+    extern float pressure;     // hectopascal (hPa)
 
-  
-  void initialize();
-  void loop();
-
-	void initGyro();
-	void initAcc();
-	void initMag();
-	void readGyro();
-	void readAcc();
-	void readMag();
-  void readTemp();
+    void initialize();
+    void loop();
 }
 #endif

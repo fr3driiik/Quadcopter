@@ -7,7 +7,10 @@
 
 namespace Navigation {
   void update(float deltaTime) {
-    if (Receiver::get_channel_value(THROTTLE_CHANNEL) > RCRECEIVER_MIN + THROTTLE_DEAD_BAND) {
+    if (Receiver::failsafe || Receiver::get_channel_value(THROTTLE_CHANNEL) < RCRECEIVER_MIN + THROTTLE_DEAD_BAND) {
+       //failsafe or too low throttle
+      Control::stop();
+    } else {
       float throttle = map(Receiver::get_channel_value(THROTTLE_CHANNEL), RCRECEIVER_MIN + THROTTLE_DEAD_BAND, RCRECEIVER_MAX, ESC_MIN, ESC_MAX - THROTTLE_CAP);
       Control::set_throttle(throttle);
       if (Receiver::get_channel_value(MODE_CHANNEL) < 1500) {
@@ -23,8 +26,6 @@ namespace Navigation {
         float yaw_target_rate = map(Receiver::get_channel_value(YAW_CHANNEL), RCRECEIVER_MIN, RCRECEIVER_MAX, -YAW_MAX_DPS, YAW_MAX_DPS);
         Control::set_rate_target(pitch_target_rate, roll_target_rate, yaw_target_rate);
       }
-    } else { //too low throttle
-      Control::stop();
     }
   }
 }

@@ -1,14 +1,3 @@
-/*Quadcopter!
- * 
- * Sensorsticka I2C:
- * I2C device found at address 0x1E  ! = HMC5883L magnetometer
- * I2C device found at address 0x41  ! = BMA180 accelerometer
- * I2C device found at address 0x42  ! = 0b 0100 0010, ublox m8n GPS, uses serial1 instead
- * I2C device found at address 0x68  ! = ITG3050 gyro
- * I2C device found at address 0x76  ! = MS5611 Altimeter
- * 
- * AnvÃ¤nder arduinos inbyggda watchDogTimer
- */
 #include <Arduino.h>
 #include <avr/wdt.h>
 #include <Wire.h>
@@ -22,18 +11,7 @@
 #include "Navigation.h"
 #include "Control.h"
 
-#define I2C_SPEED 400000 //400kHz = fast mode
-#define DESIRED_HZ 500 //2ms
-#define AVAIL_LOOP_TIME (1000000 / DESIRED_HZ) //micros
-
-#define OUTPUT__BAUD_RATE 115200
-#define DEBUG_OUTPUT false
-#define PRINT_SENSOR_DATA false
-#define PRINT_PYR_DATA false
-#define PRINT_RECEIVER_CHANNELS false
-#define PRINT_STATE false
-#define PRINT_GPS_DATA false
-#define PRINT_LOOP_TIME false
+const uint32_t AVAIL_LOOP_TIME (1000000 / DESIRED_LOOP_HZ); //micros
 
 unsigned long timer;
 unsigned long timer1HZ;
@@ -41,7 +19,7 @@ unsigned long timer10HZ;
 
 void setup() {
     wdt_disable();
-    Serial.begin(OUTPUT__BAUD_RATE);
+    Serial.begin(OUTPUT_BAUD_RATE);
     Serial.println("\nInitializing..");
     Wire.begin();
     Wire.setClock(I2C_SPEED);
@@ -51,8 +29,8 @@ void setup() {
     #endif
     Receiver::initialize();
     Control::initialize();
+    wdt_enable(WDTO_500MS);  // watchdog timer TODO not working for teensy
     Serial.println("Ready for takeoff!");
-    wdt_enable(WDTO_500MS);  // watchdog timer
     timer = micros();
 }
 
@@ -77,7 +55,6 @@ void loop() {
     IMU::update(deltaTime);
     Navigation::update(deltaTime);
     Control::update(deltaTime);
-    Serial.println();
 
     //stable hz, wait for desired time
     long timeLeft = AVAIL_LOOP_TIME - (micros() - timer);
