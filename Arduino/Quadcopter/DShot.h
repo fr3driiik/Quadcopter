@@ -39,12 +39,12 @@ const uint16_t DSHOT_bit_length = uint64_t(F_TMR) * DSHOT_BT_DURATION / 10000000
 volatile IMXRT_FLEXPWM_t *DSHOT_pwm_module[DSHOT_OUTPUTS] = {
   &IMXRT_FLEXPWM2,
   &IMXRT_FLEXPWM1,
-  &IMXRT_FLEXPWM4,
+  &IMXRT_FLEXPWM2,
   &IMXRT_FLEXPWM2
 };
 
 // DMA eFlexPWM submodules
-volatile uint8_t DSHOT_pwm_submodule[DSHOT_OUTPUTS] = { 0, 3, 0, 2 };
+volatile uint8_t DSHOT_pwm_submodule[DSHOT_OUTPUTS] = { 0, 3, 1, 2 };
 
 // DMA eFlexPWM submodule PWM channel selector: A=0, B=1, X=2
 volatile uint8_t DSHOT_pwm_channel[DSHOT_OUTPUTS] = { 0, 0, 0, 1 };
@@ -59,7 +59,7 @@ volatile uint8_t DSHOT_pinmux[DSHOT_OUTPUTS] = { 1, 6, 1, 2 };
 volatile uint8_t DSHOT_dmamux[DSHOT_OUTPUTS] = {
   DMAMUX_SOURCE_FLEXPWM2_WRITE0,
   DMAMUX_SOURCE_FLEXPWM1_WRITE3,
-  DMAMUX_SOURCE_FLEXPWM4_WRITE0,
+  DMAMUX_SOURCE_FLEXPWM2_WRITE1,
   DMAMUX_SOURCE_FLEXPWM2_WRITE2
 };
 

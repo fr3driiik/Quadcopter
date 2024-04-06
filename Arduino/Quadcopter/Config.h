@@ -34,7 +34,7 @@
 #define DSHOT_BITRATE 300000  // bit/s. dshot ESC usually supports 150k, 300k, 600k and 1200k.
 #define ESC_FL_PIN 4
 #define ESC_FR_PIN 8
-#define ESC_RL_PIN 22
+#define ESC_RL_PIN 5
 #define ESC_RR_PIN 9
 
 //PID
@@ -54,14 +54,14 @@
 #define THROTTLE_CAP 2 * PID_RATE_OUTPUT_LIMIT
 #define FAILSAFE_DELAY 300000 // us. after 0,3 seconds of no signal on choosen channel, in this case ch3 because ch 4 is receiveing last value..
 #define FAILSAFE_CHANNEL 3
-#define CHANNEL1_INPUT_PIN 0
-#define CHANNEL2_INPUT_PIN 1
-#define CHANNEL3_INPUT_PIN 2
-#define CHANNEL4_INPUT_PIN 3
-#define CHANNEL5_INPUT_PIN 5
-#define CHANNEL6_INPUT_PIN 6
-#define CHANNEL7_INPUT_PIN 7
-#define CHANNEL8_INPUT_PIN 10
+#define CHANNEL1_INPUT_PIN 14
+#define CHANNEL2_INPUT_PIN 15
+#define CHANNEL3_INPUT_PIN 16
+#define CHANNEL4_INPUT_PIN 17
+#define CHANNEL5_INPUT_PIN 20
+#define CHANNEL6_INPUT_PIN 21
+#define CHANNEL7_INPUT_PIN 22
+#define CHANNEL8_INPUT_PIN 23
 
 //Battery
 #define VOLTAGE_MAX (4 * 4.2) //4cell LiPo
